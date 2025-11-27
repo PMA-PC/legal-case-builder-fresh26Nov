@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { OnDragEndResponder } from '@hello-pangea/dnd';
-import { AnalysisResults, Allegation, ResponseStrategy, BoardState, EvidenceItem, Column, DiscoveredEvidence, UnstatedClaim, DocumentRequest, CaseData, AiSuggestion, TimelineEvent, Comparator, MoodLogEntry, CharacterProfileData } from './types';
+import { AnalysisResults, Allegation, ResponseStrategy, BoardState, EvidenceItem, Column, DiscoveredEvidence, UnstatedClaim, DocumentRequest, CaseData, AiSuggestion, TimelineEvent, Comparator, CharacterProfileData } from './types';
 import {
   analyzeCase,
   getImprovementSuggestions,
@@ -215,7 +215,7 @@ const initialCaseData: CaseData = {
   damages: null,
   comparatorAnalysis: null,
   pretextAnalysis: null,
-  moodLogs: [],
+
   characterProfileData: { evidence: [] },
   careerEvents: [],
   peerComparisons: [],
@@ -307,10 +307,7 @@ const App: React.FC = () => {
           parsedData.letterContent = null;
         }
 
-        // Ensure moodLogs exists
-        if (parsedData.moodLogs === undefined) {
-          parsedData.moodLogs = [];
-        }
+
 
         // Ensure characterProfileData exists
         if (parsedData.characterProfileData === undefined) {
@@ -1065,80 +1062,7 @@ const App: React.FC = () => {
     // AuthContext listener will update user state
   };
 
-  const Header: React.FC = () => (
-    <header className="bg-white dark:bg-gray-800 shadow-md">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Wrongful Termination Case Builder</h1>
-          <div className="flex items-center space-x-4">
-            {user ? (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 dark:text-gray-300">
-                  {user.email}
-                </span>
-                <button
-                  onClick={handleLogout}
-                  className="px-3 py-1 text-xs font-medium text-white bg-gray-600 rounded-full hover:bg-gray-700"
-                >
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowLogin(true)}
-                className="px-3 py-1 text-xs font-medium text-white bg-teal-600 rounded-full hover:bg-teal-700"
-              >
-                Login
-              </button>
-            )}
-            <div className="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
-            <button
-              onClick={handleLoadReferenceData}
-              className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-100 rounded-lg hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800"
-            >
-              Load Reference Data
-            </button>
-            <button
-              onClick={handleClearData}
-              className="px-4 py-2 text-sm font-medium text-red-600 bg-red-100 rounded-lg hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800"
-            >
-              Clear All Data
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
-  );
 
-  const InputSection: React.FC<{
-    title: string;
-    value: string;
-    onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-    placeholder: string;
-    sectionKey: string;
-    isOpen: boolean;
-    onToggle: () => void;
-  }> = ({ title, value, onChange, placeholder, sectionKey, isOpen, onToggle }) => (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
-      <h3 className="text-xl font-bold text-gray-800 dark:text-white px-6 py-4 cursor-pointer flex justify-between items-center" onClick={onToggle}>
-        {title}
-        <svg className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </h3>
-      {isOpen && (
-        <div className="p-6 border-t border-gray-200 dark:border-gray-700" id={`accordion-body-${sectionKey}`} role="region" aria-labelledby={`accordion-header-${sectionKey}`}>
-          <textarea
-            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            rows={10}
-            value={value}
-            onChange={onChange}
-            placeholder={placeholder}
-          />
-        </div>
-      )}
-    </div>
-  );
 
   const handleAccordionToggle = (sectionKey: string) => {
     setOpenAccordion(prev => (prev === sectionKey ? null : sectionKey));
@@ -1171,7 +1095,13 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {showLogin && <LoginModal />}
-      <Header />
+      <Header
+        user={user}
+        handleLogout={handleLogout}
+        setShowLogin={setShowLogin}
+        handleLoadReferenceData={handleLoadReferenceData}
+        handleClearData={handleClearData}
+      />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Main Navigation Tabs (Pre-Analysis) */}

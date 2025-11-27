@@ -206,8 +206,7 @@ export interface CaseData {
   protectedActivityDate?: string;
   terminationDate?: string;
 
-  // New fields for Mood Log and Character Profile
-  moodLogs: MoodLogEntry[];
+  // New fields for Character Profile
   characterProfileData: CharacterProfileData;
   careerEvents: CareerEvent[];
   peerComparisons: PeerComparisonData[];
@@ -219,15 +218,6 @@ export interface RawEvidence {
   file: UploadedFile;
   category: string;
   description: string;
-}
-
-export interface MoodLogEntry {
-  id: string;
-  date: string;
-  feeling: string;
-  primaryEmotionColor: string;
-  rating: number;
-  comment: string;
 }
 
 export interface UploadedFile {
