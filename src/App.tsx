@@ -1692,7 +1692,6 @@ const App: React.FC = () => {
                       isAnalyzing={isLoading}
                     />
                   </div>
-                )}
                 </div>
             </section >
           )}
