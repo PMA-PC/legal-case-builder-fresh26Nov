@@ -1617,3 +1617,39 @@ Upon termination on September 17, 2025, I lost:
 
 ---
 
+
+
+---
+
+## SECTION: PROFESSIONAL PROFILE & CHARACTER
+
+### Question 200: Provide a Professional Profile summary based on historical performance.
+
+**Professional Profile**:
+Joshua D. Shipman is a high-performing Claims Manager with over 9 years of tenure at GAINSCO.
+- **Key Strengths**: Creativity, Critical Understanding, Execution & Operational Excellence, Drive, Perseverance.
+- **Track Record**: Consistently rated 'Exceeds Expectations' (2021-2023).
+- **Leadership**: Successfully rebuilt the 'Fast Lane' division during the Great Resignation; managed Total Loss and QRM divisions.
+- **Innovation**: Known for thoughtful leadership and creative solutions to business challenges (e.g., PD split, PD subro centralization).
+- **Work Ethic**: Described as having a 'tireless work ethic' and strong desire for responsibility.
+
+*Source: Shipman_Historical.pptx, Performance Reviews 2021-2023*
+
+---
+
+### Question 201: Describe the 'Championship Characteristics' and Character evidence.
+
+**Championship Characteristics**:
+1. **Creativity**: Rated 'Exceeds'. Thoughtful leader who tackles business problems creatively.
+2. **Critical Understanding**: Rated 'Exceeds'. Strong awareness of business improvement needs.
+3. **Execution**: Ability to execute at the highest level; drives high performance.
+4. **Drive**: Strong desire to succeed and focus on team excellence.
+5. **Perseverance**: Drives solutions through obstacles (e.g., MO Subro centralization).
+
+**Character Reference**:
+Colleagues and former supervisors (like Mark Hayes) describe Mr. Shipman as a 'passionate' leader whose dedication can sometimes be misinterpreted but is rooted in a deep commitment to excellence. He has a history of mentoring others and stepping up to handle complex challenges when the company needed it most.
+
+*Source: Shipman_Historical.pptx, 2022-2023 Mid-Year Reviews*
+
+---
+
