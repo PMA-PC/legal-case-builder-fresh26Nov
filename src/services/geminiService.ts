@@ -3,7 +3,7 @@ import { AnalysisResults, Allegation, ArbitrationAnalysis, Timeline, TimelineEve
 
 // Helper to get AI instance
 const getAI = () => {
-  const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
   console.log("Gemini Service: API Key present:", !!apiKey);
   if (!apiKey) {
     console.error("API Key is missing!");
