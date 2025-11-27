@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@google/genai": "latest",
+    "@google/generative-ai": "^0.24.1",
     "@hello-pangea/dnd": "latest",
     "@supabase/supabase-js": "^2.86.0",
     "clsx": "latest",

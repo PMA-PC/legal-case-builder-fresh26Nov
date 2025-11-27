@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { AnalysisResults, Allegation, ArbitrationAnalysis, Timeline, TimelineEvent, DamagesBreakdown, ComparatorAnalysis, Comparator } from '../types';
 
 // Helper to get AI instance
@@ -10,7 +10,7 @@ const getAI = () => {
     alert("DEBUG: Gemini API Key is MISSING in environment variables!");
     throw new Error("API Key is missing");
   }
-  return new GoogleGenAI({ apiKey });
+  return new GoogleGenerativeAI(apiKey);
 };
 
 export async function analyzeCase(
@@ -21,8 +21,8 @@ export async function analyzeCase(
   handbookUrl: string
 ): Promise<AnalysisResults | null> {
   try {
-    const ai = getAI();
-    const model = "gemini-1.5-flash";
+    const genAI = getAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
     As an expert AI legal strategist specializing in Texas employment law, analyze this case.
@@ -36,19 +36,19 @@ export async function analyzeCase(
     Provide a comprehensive legal analysis in JSON format.
     `;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-      config: {
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
         responseMimeType: "application/json",
       }
     });
 
-    const jsonText = response.text.trim();
+    const response = await result.response;
+    const jsonText = response.text().trim();
     return JSON.parse(jsonText) as AnalysisResults;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error analyzing case:", error);
-    alert(`DEBUG: Error analyzing case: ${error}`);
+    alert(`DEBUG: Error analyzing case: ${JSON.stringify(error, Object.getOwnPropertyNames(error))}`);
     return null;
   }
 }
@@ -59,17 +59,14 @@ export async function getImprovementSuggestions(
   originalComplaint: string
 ): Promise<string | null> {
   try {
-    const ai = getAI();
-    const model = "gemini-1.5-flash";
+    const genAI = getAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Provide improvement suggestions for this legal section:\nTitle: ${sectionTitle}\nContent: ${sectionContent}\nOriginal Complaint: ${originalComplaint}`;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-    });
-
-    return response.text;
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
   } catch (error) {
     console.error("Error getting improvement suggestions:", error);
     return null;
@@ -81,21 +78,21 @@ export async function analyzeFileForRelevance(
   allegations: Allegation[]
 ): Promise<{ isRelevant: boolean; relevanceType: 'specific' | 'proactive'; specificAllegation?: string; proactiveCategory?: string; justification: string; category: string; } | null> {
   try {
-    const ai = getAI();
-    const model = "gemini-1.5-flash";
+    const genAI = getAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const allegationText = allegations.map(a => `- ${a.claim}: ${a.summary}`).join('\n');
     const prompt = `Analyze if this file is relevant to these allegations:\n${allegationText}\n\nFile Content: ${fileContent}`;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-      config: {
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
         responseMimeType: "application/json",
       }
     });
 
-    const parsed = JSON.parse(response.text.trim());
+    const response = await result.response;
+    const parsed = JSON.parse(response.text().trim());
     return parsed;
   } catch (error) {
     console.error("Error analyzing file:", error);
@@ -113,17 +110,14 @@ export async function generateLegalLetter(
   tone: 'demand' | 'settlement'
 ): Promise<string | null> {
   try {
-    const ai = getAI();
-    const model = "gemini-1.5-flash";
+    const genAI = getAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Generate a ${tone} letter based on this analysis: ${JSON.stringify(analysis)}`;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-    });
-
-    return response.text;
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
   } catch (error) {
     console.error("Error generating letter:", error);
     return null;
@@ -156,20 +150,20 @@ export async function analyzeAnswerConfidence(
   allQuestionsContext?: string
 ): Promise<QuestionAnalysisResult | null> {
   try {
-    const ai = getAI();
-    const model = "gemini-1.5-flash";
+    const genAI = getAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Analyze this Q&A for a Texas employment law case:\nQuestion: ${question}\nAnswer: ${answer}\nContext: ${allQuestionsContext || 'None'}`;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-      config: {
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
         responseMimeType: "application/json",
       }
     });
 
-    return JSON.parse(response.text.trim());
+    const response = await result.response;
+    return JSON.parse(response.text().trim());
   } catch (error) {
     console.error("Error analyzing answer confidence:", error);
     return null;
@@ -181,21 +175,21 @@ export async function generateFollowUpQuestions(
   answer: string
 ): Promise<string[] | null> {
   try {
-    const ai = getAI();
-    const model = "gemini-1.5-flash";
+    const genAI = getAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Generate follow-up questions for:\nQ: ${question}\nA: ${answer}`;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-      config: {
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
         responseMimeType: "application/json",
       }
     });
 
-    const result = JSON.parse(response.text.trim());
-    return result.questions || [];
+    const response = await result.response;
+    const parsed = JSON.parse(response.text().trim());
+    return parsed.questions || [];
   } catch (error) {
     console.error("Error generating follow-up questions:", error);
     return null;
@@ -207,20 +201,20 @@ export async function analyzeQuestion(
   answer: string
 ): Promise<any> {
   try {
-    const ai = getAI();
-    const model = "gemini-1.5-flash";
+    const genAI = getAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Analyze this legal question and answer:\nQ: ${question}\nA: ${answer}`;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-      config: {
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
         responseMimeType: "application/json",
       }
     });
 
-    return JSON.parse(response.text.trim());
+    const response = await result.response;
+    return JSON.parse(response.text().trim());
   } catch (error) {
     console.error("Error analyzing question:", error);
     return null;
@@ -232,21 +226,21 @@ export async function determineDiscoveryNeed(
   answer: string
 ): Promise<any[]> {
   try {
-    const ai = getAI();
-    const model = "gemini-1.5-flash";
+    const genAI = getAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Determine discovery needs for:\nQ: ${question}\nA: ${answer}`;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-      config: {
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
         responseMimeType: "application/json",
       }
     });
 
-    const result = JSON.parse(response.text.trim());
-    return result.documents || [];
+    const response = await result.response;
+    const parsed = JSON.parse(response.text().trim());
+    return parsed.documents || [];
   } catch (error) {
     console.error("Error determining discovery need:", error);
     return [];
@@ -258,17 +252,14 @@ export async function determineEvidenceStatus(
   answer: string
 ): Promise<string> {
   try {
-    const ai = getAI();
-    const model = "gemini-1.5-flash";
+    const genAI = getAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Determine evidence status for:\nQ: ${question}\nA: ${answer}`;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-    });
-
-    return response.text.trim();
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text().trim();
   } catch (error) {
     console.error("Error determining evidence status:", error);
     return "unknown";
@@ -280,17 +271,14 @@ export async function generateExampleAnswer(
   caseContext: string
 ): Promise<string | null> {
   try {
-    const ai = getAI();
-    const model = "gemini-1.5-flash";
+    const genAI = getAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Generate an example answer for:\nQuestion: ${question}\nContext: ${caseContext}`;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-    });
-
-    return response.text;
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
   } catch (error) {
     console.error("Error generating example answer:", error);
     return null;
@@ -304,24 +292,24 @@ export async function analyzeArbitrationAgreement(
   protectedActivityDate: string
 ): Promise<ArbitrationAnalysis | null> {
   try {
-    const ai = getAI();
-    const model = "gemini-1.5-flash";
+    const genAI = getAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Analyze this arbitration agreement:\n${agreementText}\nSigned: ${signedDate}\nProtected Activity: ${protectedActivityDate}`;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-      config: {
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
         responseMimeType: "application/json",
       }
     });
 
-    const result = JSON.parse(response.text.trim());
+    const response = await result.response;
+    const parsed = JSON.parse(response.text().trim());
     return {
       agreementText,
       signedDate,
-      ...result
+      ...parsed
     };
   } catch (error) {
     console.error("Error analyzing arbitration agreement:", error);
@@ -333,8 +321,8 @@ export async function analyzeTemporalProximity(
   events: TimelineEvent[]
 ): Promise<Timeline | null> {
   try {
-    const ai = getAI();
-    const model = "gemini-1.5-flash";
+    const genAI = getAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const sortedEvents = [...events].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     const protectedActivity = sortedEvents.find(e => e.type === 'protected_activity');
@@ -346,20 +334,20 @@ export async function analyzeTemporalProximity(
 
     const prompt = `Analyze temporal proximity for these events:\n${JSON.stringify(sortedEvents)}`;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-      config: {
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
         responseMimeType: "application/json",
       }
     });
 
-    const result = JSON.parse(response.text.trim());
+    const response = await result.response;
+    const parsed = JSON.parse(response.text().trim());
     return {
       events: sortedEvents,
       protectedActivityDate: protectedActivity.date,
       terminationDate: termination.date,
-      ...result
+      ...parsed
     };
   } catch (error) {
     console.error("Error analyzing temporal proximity:", error);
@@ -383,28 +371,28 @@ export async function calculateDamages(inputData: {
   reputationalHarmJustification: string;
 }): Promise<DamagesBreakdown | null> {
   try {
-    const ai = getAI();
-    const model = "gemini-1.5-flash";
+    const genAI = getAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const currentDate = new Date().toISOString().split('T')[0];
 
     const prompt = `Calculate damages for wrongful termination:\n${JSON.stringify(inputData)}`;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-      config: {
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
         responseMimeType: "application/json",
       }
     });
 
-    const result = JSON.parse(response.text.trim());
+    const response = await result.response;
+    const parsed = JSON.parse(response.text().trim());
     return {
       salary: inputData.salary,
       terminationDate: inputData.terminationDate,
       currentDate,
       newJobSalary: inputData.newJobSalary,
       newJobStartDate: inputData.newJobStartDate,
-      ...result
+      ...parsed
     };
   } catch (error) {
     console.error("Error calculating damages:", error);
@@ -418,20 +406,20 @@ export async function analyzeComparators(
   comparators: Comparator[]
 ): Promise<ComparatorAnalysis | null> {
   try {
-    const ai = getAI();
-    const model = "gemini-1.5-flash";
+    const genAI = getAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Analyze comparator evidence:\nMisconduct: ${allegedMisconduct}\nDiscipline: ${yourDiscipline}\nComparators: ${JSON.stringify(comparators)}`;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-      config: {
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
         responseMimeType: "application/json",
       }
     });
 
-    return JSON.parse(response.text.trim());
+    const response = await result.response;
+    return JSON.parse(response.text().trim());
   } catch (error) {
     console.error("Error analyzing comparators:", error);
     return null;
@@ -453,20 +441,20 @@ export async function analyzePretext(
   modelEmployeeNarrative: string;
 } | null> {
   try {
-    const ai = getAI();
-    const model = "gemini-1.5-flash";
+    const genAI = getAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Analyze pretext:\nStated: ${statedReason}\nActual: ${actualReason}\nEvidence: ${evidence}\nComparators: ${comparators}`;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-      config: {
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
         responseMimeType: "application/json",
       }
     });
 
-    return JSON.parse(response.text.trim());
+    const response = await result.response;
+    return JSON.parse(response.text().trim());
   } catch (error) {
     console.error("Error analyzing pretext:", error);
     return null;
@@ -479,8 +467,8 @@ export async function generateComplaintDraft(
   complaintText: string
 ): Promise<string | null> {
   try {
-    const ai = getAI();
-    const model = "gemini-1.5-flash";
+    const genAI = getAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Draft a formal ${complaintType} complaint based on this analysis and original complaint:
     
@@ -490,12 +478,9 @@ export async function generateComplaintDraft(
     
     Format the output as a formal legal document suitable for filing with the ${complaintType}. Include specific allegations, relevant laws (ADA, Texas Labor Code), and requested relief.`;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-    });
-
-    return response.text;
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
   } catch (error) {
     console.error("Error generating complaint draft:", error);
     return null;
@@ -507,8 +492,8 @@ export async function generateDiscoveryRequest(
   questions: any[] // Pass the questions with discovery needs
 ): Promise<string | null> {
   try {
-    const ai = getAI();
-    const model = "gemini-1.5-flash";
+    const genAI = getAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const discoveryNeeds = questions.filter(q => q.needDiscovery).map(q => ({
       question: q.question,
@@ -524,12 +509,9 @@ export async function generateDiscoveryRequest(
     
     Format as a formal legal demand letter for discovery.`;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-    });
-
-    return response.text;
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
   } catch (error) {
     console.error("Error generating discovery request:", error);
     return null;
