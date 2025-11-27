@@ -1693,6 +1693,7 @@ const App: React.FC = () => {
                     />
                   </div>
                 </div>
+              </div>
             </section >
           )}
         </div >
