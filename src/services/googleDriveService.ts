@@ -18,6 +18,11 @@ export function initClient(callback: (isSignedIn: boolean) => void) {
         if (typeof gapi !== 'undefined' && typeof google !== 'undefined') {
             // Libraries are loaded, proceed with initialization.
             gapi.load('client', async () => {
+                if (!GOOGLE_API_KEY || !GOOGLE_CLIENT_ID) {
+                    console.warn("Google Drive API keys are missing. Drive integration disabled.");
+                    callback(false);
+                    return;
+                }
                 await gapi.client.init({
                     apiKey: GOOGLE_API_KEY,
                     discoveryDocs: DISCOVERY_DOCS,
