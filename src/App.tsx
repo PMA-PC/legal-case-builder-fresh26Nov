@@ -29,7 +29,7 @@ import ArbitrationAnalyzer from './components/ArbitrationAnalyzer';
 import TimelineBuilder from './components/TimelineBuilder';
 import DamagesCalculator from './components/DamagesCalculator';
 import ComparatorModule from './components/ComparatorModule';
-import MoodLogModal from './components/MoodLogModal';
+
 import CharacterProfileBuilder from './components/CharacterProfileBuilder';
 import DocumentUploader from './components/DocumentUploader';
 // import PretextAnalyzer from './components/PretextAnalyzer';
@@ -229,7 +229,7 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'input' | 'files' | 'investigation' | 'evidence' | 'strategy' | 'conference' | 'questions' | 'advanced'>('input');
   const [isSuggesting, setIsSuggesting] = useState<Record<string, boolean>>({});
   const [openAccordion, setOpenAccordion] = useState<string | null>('complaintText'); // State for open accordion
-  const [isMoodModalOpen, setIsMoodModalOpen] = useState(false);
+
 
   // Legal Questions State
   const [questions, setQuestions] = useState<LegalQuestion[]>(LEGAL_QUESTIONS);
@@ -415,20 +415,7 @@ const App: React.FC = () => {
     };
   };
 
-  const handleSaveMoodLog = (feeling: string, primaryEmotionColor: string, rating: number, comment: string) => {
-    const newEntry: MoodLogEntry = {
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-      feeling,
-      primaryEmotionColor,
-      rating,
-      comment
-    };
-    setCaseData(prev => ({
-      ...prev,
-      moodLogs: [...prev.moodLogs, newEntry]
-    }));
-  };
+
 
   const handleProfileChange = (newProfileData: CharacterProfileData) => {
     setCaseData(prev => ({
@@ -1293,12 +1280,6 @@ const App: React.FC = () => {
                 </button>
                 <div className="flex gap-4">
                   <button
-                    onClick={() => setIsMoodModalOpen(true)}
-                    className="px-4 py-2 text-sm font-medium rounded-md text-purple-600 dark:text-purple-400 border border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition flex items-center gap-2"
-                  >
-                    <span>🧠</span> Track Emotional Impact
-                  </button>
-                  <button
                     onClick={() => setActiveTab('questions')}
                     className="px-4 py-2 text-sm font-medium rounded-md text-green-600 dark:text-green-400 border border-green-500 hover:bg-green-50 dark:hover:bg-green-900/30 transition flex items-center gap-2"
                   >
@@ -1699,11 +1680,7 @@ const App: React.FC = () => {
         </div >
       </main >
 
-      <MoodLogModal
-        isOpen={isMoodModalOpen}
-        onClose={() => setIsMoodModalOpen(false)}
-        onSave={handleSaveMoodLog}
-      />
+
     </div >
   );
 }
