@@ -859,13 +859,13 @@ MGA Insurance Company Inc / GAINSCO Auto Insurance
 
 ### Question 93: How many employees does/did the company have (must be 15+ for EEOC jurisdiction)?
 
-
+500+ (Estimated based on company size)
 
 ---
 
 ### Question 94: What was your annual salary/compensation?
 
-
+$129,327
 
 ---
 
@@ -885,25 +885,25 @@ Autism Spectrum Disorder
 
 ### Question 97: When were you formally diagnosed?
 
-
+July 2025 (Formal diagnosis provided in medical letters)
 
 ---
 
 ### Question 98: Who provided your diagnosis (healthcare provider name)?
 
-
+Ayla Jenson Naughton, MSN, APRN, PMHNP-BC
 
 ---
 
 ### Question 99: Do you have medical documentation supporting your diagnosis?
 
-
+Yes - Medical letters dated July 1 and July 29, 2025
 
 ---
 
 ### Question 100: Does your disability substantially limit one or more major life activities?
 
-
+Yes - Limits sensory processing, executive functioning, and social interaction in high-stimulus environments.
 
 ---
 
@@ -919,7 +919,7 @@ July 2025
 
 ### Question 102: Are they in different protected classes (age, race, gender, orientation)?
 
-
+Yes - Franco Glaze (Black Male, younger), Kim Price (Black Female, younger). Both non-disabled.
 
 ---
 
