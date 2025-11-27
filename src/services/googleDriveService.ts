@@ -6,8 +6,8 @@ declare const gapi: any;
 // Declare the 'google' global object provided by the Google Identity Services library.
 declare const google: any;
 
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID; // Corrected: Use GOOGLE_CLIENT_ID
+const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
 const SCOPES = "https://www.googleapis.com/auth/drive.readonly";
 
