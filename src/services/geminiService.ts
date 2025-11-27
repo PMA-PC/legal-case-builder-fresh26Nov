@@ -4,9 +4,10 @@ import { AnalysisResults, Allegation, ArbitrationAnalysis, Timeline, TimelineEve
 // Helper to get AI instance
 const getAI = () => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
-  console.log("Gemini Service: API Key present:", !!apiKey);
+  // console.log("Gemini Service: API Key present:", !!apiKey);
   if (!apiKey) {
     console.error("API Key is missing!");
+    alert("DEBUG: Gemini API Key is MISSING in environment variables!");
     throw new Error("API Key is missing");
   }
   return new GoogleGenAI({ apiKey });
@@ -47,6 +48,7 @@ export async function analyzeCase(
     return JSON.parse(jsonText) as AnalysisResults;
   } catch (error) {
     console.error("Error analyzing case:", error);
+    alert(`DEBUG: Error analyzing case: ${error}`);
     return null;
   }
 }
