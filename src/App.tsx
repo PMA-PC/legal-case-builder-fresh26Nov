@@ -493,7 +493,7 @@ const App: React.FC = () => {
   };
 
   const handleLoadReferenceData = async () => {
-    if (!window.confirm("This will overwrite your current Complaint, Character Profile, and Job Description text with data from the '160 Questions' file. It will also populate the Questions tab. Are you sure?")) return;
+    if (!window.confirm("This will populate the Questions tab with reference answers. For the Case Details (Complaint, etc.), it will ONLY fill in fields that are currently empty. Your existing text will be preserved. Continue?")) return;
 
     setIsLoading(true);
     try {
@@ -505,10 +505,10 @@ const App: React.FC = () => {
 
       setCaseData(prev => ({
         ...prev,
-        complaintText: parsed.complaintText || prev.complaintText,
-        characterProfileText: parsed.characterProfileText || prev.characterProfileText,
-        jobDescriptionText: parsed.jobDescriptionText || prev.jobDescriptionText,
-        actualDutiesText: parsed.actualDutiesText || prev.actualDutiesText,
+        complaintText: prev.complaintText || parsed.complaintText || "",
+        characterProfileText: prev.characterProfileText || parsed.characterProfileText || "",
+        jobDescriptionText: prev.jobDescriptionText || parsed.jobDescriptionText || "",
+        actualDutiesText: prev.actualDutiesText || parsed.actualDutiesText || "",
       }));
 
       // Update questions with parsed answers
