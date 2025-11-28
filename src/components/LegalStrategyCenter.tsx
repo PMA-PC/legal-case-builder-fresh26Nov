@@ -14,7 +14,10 @@ export const LegalStrategyCenter: React.FC<Props> = ({ analysisData, onBack }) =
     const [activeTab, setActiveTab] = useState<string>('dashboard');
 
     const initializeStrategy = async () => {
-        if (!analysisData) return;
+        if (!analysisData) {
+            alert("No analysis data found. Please click 'Load Reference Data' or run a new analysis first.");
+            return;
+        }
         setLoading(true);
         try {
             // Fetch the actual markdown content for Q&A
