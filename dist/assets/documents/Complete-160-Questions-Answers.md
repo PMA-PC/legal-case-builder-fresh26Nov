@@ -1011,6 +1011,13 @@ Discrimination based on sexual orientation, age, and beliefs; hostile work envir
 
 ---
 
+### Question 32: Describe any changes in your job duties or environment prior to termination.
+
+**Answer**:
+Job title reduction, then scope reduction, then left out of meeting, embarrassed by not knowing side discussions that were happening without my knowledge with my account, adverse opinions formed about my performance and ability, additional hardship by taking away resources known to support the team, additional workload and requests that were previously for a lower grade employee to complete, accommodation denial, and finally termination. causing stress and anxiety; retaliation for advising against bias; pay/title inequity compared to peers; additional role responsibilities without support or compensation; unobtainable metrics and goals; reduction in scope and workforce.
+
+---
+
 ### Question 117: Company Response
 
 Same-day acknowledgment (Aug 16, 4:36 PM) - case assigned to Sola Opeola. Aug 19, 1:12 PM - General Counsel Drew directed "thorough investigation" by Sola Opeola. Investigation findings NEVER communicated before termination.
