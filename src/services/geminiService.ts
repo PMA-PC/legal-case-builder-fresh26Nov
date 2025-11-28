@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { AnalysisResults, Allegation, ArbitrationAnalysis, Timeline, TimelineEvent, DamagesBreakdown, ComparatorAnalysis, Comparator } from '../types';
 
 // Helper to get AI instance
-const getAI = () => {
+export const getAI = () => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
   // console.log("Gemini Service: API Key present:", !!apiKey);
   if (!apiKey) {

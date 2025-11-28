@@ -55,7 +55,8 @@ export class LegalStrategyService {
     }
 
     private async extractFactsFromMarkdown(markdown: string): Promise<LegalFact[]> {
-        const model = getAI();
+        const genAI = getAI();
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         // Chunking might be needed if markdown is huge, but for 160 Q&A it might fit in 1-2 calls.
         // For now, let's assume we send the first 30k chars or split it.
 

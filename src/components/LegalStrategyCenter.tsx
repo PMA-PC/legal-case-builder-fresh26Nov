@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { legalStrategyService } from '../services/legalStrategyService';
 import { CaseGraph, Complaint } from '../types/legalStrategy';
-import { AnalysisResults } from '../services/geminiService';
+import { AnalysisResults } from '../types';
 
 interface Props {
     analysisData: AnalysisResults | null;
