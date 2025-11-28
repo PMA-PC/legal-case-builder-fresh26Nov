@@ -182,7 +182,26 @@ Review and make recommendations to ensure customer service and improved quality 
 
 Foster a mutual partnership with QRM, Safelite, and other vendors to ensure high quality and efficient use of services.`;
 
-const initialCharacterProfileText = `8-year employee with a consistent record of high performance, positive reviews, and zero disciplinary actions.
+const initialCharacterProfileText = `**Professional Profile**:
+Joshua D. Shipman is a high-performing Claims Manager with over 9 years of tenure at GAINSCO.
+- **Key Strengths**: Creativity, Critical Understanding, Execution & Operational Excellence, Drive, Perseverance.
+- **Track Record**: Consistently rated 'Exceeds Expectations' (2021-2023).
+- **Leadership**: Successfully rebuilt the 'Fast Lane' division during the Great Resignation; managed Total Loss and QRM divisions.
+- **Innovation**: Known for thoughtful leadership and creative solutions to business challenges (e.g., PD split, PD subro centralization).
+- **Work Ethic**: Described as having a 'tireless work ethic' and strong desire for responsibility.
+
+**Championship Characteristics**:
+1. **Creativity**: Rated 'Exceeds'. Thoughtful leader who tackles business problems creatively.
+2. **Critical Understanding**: Rated 'Exceeds'. Strong awareness of business improvement needs.
+3. **Execution**: Ability to execute at the highest level; drives high performance.
+4. **Drive**: Strong desire to succeed and focus on team excellence.
+5. **Perseverance**: Drives solutions through obstacles (e.g., MO Subro centralization).
+
+**Character Reference**:
+Colleagues and former supervisors (like Mark Hayes) describe Mr. Shipman as a 'passionate' leader whose dedication can sometimes be misinterpreted but is rooted in a deep commitment to excellence. He has a history of mentoring others and stepping up to handle complex challenges when the company needed it most.
+
+**Additional Context**:
+8-year employee with a consistent record of high performance, positive reviews, and zero disciplinary actions.
 Credit score in the 830s, demonstrating high personal responsibility and reliability.
 Perfect attendance record; never calls in sick. Known for working longer hours and being more dedicated than peers.
 MBA-educated professional.
