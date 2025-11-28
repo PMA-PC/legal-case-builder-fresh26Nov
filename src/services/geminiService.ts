@@ -13,6 +13,17 @@ const getAI = () => {
   return new GoogleGenerativeAI(apiKey);
 };
 
+// Helper to clean JSON string
+const cleanJson = (text: string): string => {
+  let clean = text.trim();
+  if (clean.startsWith('```json')) {
+    clean = clean.replace(/^```json/, '').replace(/```$/, '');
+  } else if (clean.startsWith('```')) {
+    clean = clean.replace(/^```/, '').replace(/```$/, '');
+  }
+  return clean.trim();
+};
+
 export async function analyzeCase(
   complaintText: string,
   jobDescriptionText: string,
@@ -44,7 +55,7 @@ export async function analyzeCase(
     });
 
     const response = await result.response;
-    const jsonText = response.text().trim();
+    const jsonText = cleanJson(response.text());
     return JSON.parse(jsonText) as AnalysisResults;
   } catch (error: any) {
     console.error("Error analyzing case:", error);
@@ -92,7 +103,7 @@ export async function analyzeFileForRelevance(
     });
 
     const response = await result.response;
-    const parsed = JSON.parse(response.text().trim());
+    const parsed = JSON.parse(cleanJson(response.text()));
     return parsed;
   } catch (error) {
     console.error("Error analyzing file:", error);
@@ -163,7 +174,7 @@ export async function analyzeAnswerConfidence(
     });
 
     const response = await result.response;
-    return JSON.parse(response.text().trim());
+    return JSON.parse(cleanJson(response.text()));
   } catch (error) {
     console.error("Error analyzing answer confidence:", error);
     return null;
@@ -188,7 +199,7 @@ export async function generateFollowUpQuestions(
     });
 
     const response = await result.response;
-    const parsed = JSON.parse(response.text().trim());
+    const parsed = JSON.parse(cleanJson(response.text()));
     return parsed.questions || [];
   } catch (error) {
     console.error("Error generating follow-up questions:", error);
@@ -214,7 +225,7 @@ export async function analyzeQuestion(
     });
 
     const response = await result.response;
-    return JSON.parse(response.text().trim());
+    return JSON.parse(cleanJson(response.text()));
   } catch (error) {
     console.error("Error analyzing question:", error);
     return null;
@@ -239,7 +250,7 @@ export async function determineDiscoveryNeed(
     });
 
     const response = await result.response;
-    const parsed = JSON.parse(response.text().trim());
+    const parsed = JSON.parse(cleanJson(response.text()));
     return parsed.documents || [];
   } catch (error) {
     console.error("Error determining discovery need:", error);
@@ -305,7 +316,7 @@ export async function analyzeArbitrationAgreement(
     });
 
     const response = await result.response;
-    const parsed = JSON.parse(response.text().trim());
+    const parsed = JSON.parse(cleanJson(response.text()));
     return {
       agreementText,
       signedDate,
@@ -342,7 +353,7 @@ export async function analyzeTemporalProximity(
     });
 
     const response = await result.response;
-    const parsed = JSON.parse(response.text().trim());
+    const parsed = JSON.parse(cleanJson(response.text()));
     return {
       events: sortedEvents,
       protectedActivityDate: protectedActivity.date,
@@ -369,7 +380,7 @@ export async function calculateDamages(inputData: {
   emotionalDistressJustification: string;
   reputationalHarm: number;
   reputationalHarmJustification: string;
-}): Promise<DamagesBreakdown | null> {
+}: Promise<DamagesBreakdown | null> {
   try {
     const genAI = getAI();
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -385,7 +396,7 @@ export async function calculateDamages(inputData: {
     });
 
     const response = await result.response;
-    const parsed = JSON.parse(response.text().trim());
+    const parsed = JSON.parse(cleanJson(response.text()));
     return {
       salary: inputData.salary,
       terminationDate: inputData.terminationDate,
@@ -394,7 +405,7 @@ export async function calculateDamages(inputData: {
       newJobStartDate: inputData.newJobStartDate,
       ...parsed
     };
-  } catch (error) {
+  } catch(error) {
     console.error("Error calculating damages:", error);
     return null;
   }
@@ -419,7 +430,7 @@ export async function analyzeComparators(
     });
 
     const response = await result.response;
-    return JSON.parse(response.text().trim());
+    return JSON.parse(cleanJson(response.text()));
   } catch (error) {
     console.error("Error analyzing comparators:", error);
     return null;
@@ -454,7 +465,7 @@ export async function analyzePretext(
     });
 
     const response = await result.response;
-    return JSON.parse(response.text().trim());
+    return JSON.parse(cleanJson(response.text()));
   } catch (error) {
     console.error("Error analyzing pretext:", error);
     return null;
