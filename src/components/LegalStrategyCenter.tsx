@@ -17,12 +17,15 @@ export const LegalStrategyCenter: React.FC<Props> = ({ analysisData, onBack }) =
         if (!analysisData) return;
         setLoading(true);
         try {
-            // TODO: Fetch the actual markdown content for Q&A
-            const mockMarkdown = "Q: When were you hired? A: Jan 10, 2015...";
+            // Fetch the actual markdown content for Q&A
+            const response = await fetch('/assets/documents/Complete-160-Questions-Answers.md');
+            if (!response.ok) throw new Error("Failed to fetch Q&A transcript");
+            const qaMarkdown = await response.text();
+
             const graph = await legalStrategyService.ingestData(
                 { analysis: analysisData },
                 "",
-                mockMarkdown
+                qaMarkdown
             );
             setCaseGraph(graph);
         } catch (err) {
