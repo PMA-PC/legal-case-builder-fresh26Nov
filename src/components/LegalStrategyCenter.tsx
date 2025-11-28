@@ -3,6 +3,8 @@ import { legalStrategyService } from '../services/legalStrategyService';
 import { CaseGraph, Complaint } from '../types/legalStrategy';
 import { AnalysisResults } from '../types';
 
+import { SEED_ANALYSIS } from '../data/seedAnalysis';
+
 interface Props {
     analysisData: AnalysisResults | null;
     onBack: () => void;
@@ -14,7 +16,8 @@ export const LegalStrategyCenter: React.FC<Props> = ({ analysisData, onBack }) =
     const [activeTab, setActiveTab] = useState<string>('dashboard');
 
     const initializeStrategy = async () => {
-        let currentAnalysis = analysisData;
+        // Use prop if available, otherwise fall back to seed data
+        const currentAnalysis = analysisData || SEED_ANALYSIS;
 
         if (!currentAnalysis) {
             alert("No analysis data found. Please click 'Load Reference Data' or run a new analysis first.");
