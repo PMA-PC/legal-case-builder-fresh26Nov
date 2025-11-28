@@ -39,7 +39,7 @@ export async function analyzeCase(
   let rawText = '';
   try {
     const genAI = getAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `
     As an expert AI legal strategist specializing in Texas employment law, analyze this case.
@@ -81,7 +81,7 @@ export async function getImprovementSuggestions(
 ): Promise<string | null> {
   try {
     const genAI = getAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `Provide improvement suggestions for this legal section:\nTitle: ${sectionTitle}\nContent: ${sectionContent}\nOriginal Complaint: ${originalComplaint}`;
 
@@ -100,7 +100,7 @@ export async function analyzeFileForRelevance(
 ): Promise<{ isRelevant: boolean; relevanceType: 'specific' | 'proactive'; specificAllegation?: string; proactiveCategory?: string; justification: string; category: string; } | null> {
   try {
     const genAI = getAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const allegationText = allegations.map(a => `- ${a.claim}: ${a.summary}`).join('\n');
     const prompt = `Analyze if this file is relevant to these allegations:\n${allegationText}\n\nFile Content: ${fileContent}`;
@@ -132,7 +132,7 @@ export async function generateLegalLetter(
 ): Promise<string | null> {
   try {
     const genAI = getAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `Generate a ${tone} letter based on this analysis: ${JSON.stringify(analysis)}`;
 
@@ -172,7 +172,7 @@ export async function analyzeAnswerConfidence(
 ): Promise<QuestionAnalysisResult | null> {
   try {
     const genAI = getAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `Analyze this Q&A for a Texas employment law case:\nQuestion: ${question}\nAnswer: ${answer}\nContext: ${allQuestionsContext || 'None'}`;
 
@@ -197,7 +197,7 @@ export async function generateFollowUpQuestions(
 ): Promise<string[] | null> {
   try {
     const genAI = getAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `Generate follow-up questions for:\nQ: ${question}\nA: ${answer}`;
 
@@ -223,7 +223,7 @@ export async function analyzeQuestion(
 ): Promise<any> {
   try {
     const genAI = getAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `Analyze this legal question and answer:\nQ: ${question}\nA: ${answer}`;
 
@@ -248,7 +248,7 @@ export async function determineDiscoveryNeed(
 ): Promise<any[]> {
   try {
     const genAI = getAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `Determine discovery needs for:\nQ: ${question}\nA: ${answer}`;
 
@@ -274,7 +274,7 @@ export async function determineEvidenceStatus(
 ): Promise<string> {
   try {
     const genAI = getAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `Determine evidence status for:\nQ: ${question}\nA: ${answer}`;
 
@@ -293,7 +293,7 @@ export async function generateExampleAnswer(
 ): Promise<string | null> {
   try {
     const genAI = getAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `Generate an example answer for:\nQuestion: ${question}\nContext: ${caseContext}`;
 
@@ -314,7 +314,7 @@ export async function analyzeArbitrationAgreement(
 ): Promise<ArbitrationAnalysis | null> {
   try {
     const genAI = getAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `Analyze this arbitration agreement:\n${agreementText}\nSigned: ${signedDate}\nProtected Activity: ${protectedActivityDate}`;
 
@@ -343,7 +343,7 @@ export async function analyzeTemporalProximity(
 ): Promise<Timeline | null> {
   try {
     const genAI = getAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const sortedEvents = [...events].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     const protectedActivity = sortedEvents.find(e => e.type === 'protected_activity');
@@ -393,7 +393,7 @@ export async function calculateDamages(inputData: {
 }): Promise<DamagesBreakdown | null> {
   try {
     const genAI = getAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const currentDate = new Date().toISOString().split('T')[0];
 
     const prompt = `Calculate damages for wrongful termination:\n${JSON.stringify(inputData)}`;
@@ -428,7 +428,7 @@ export async function analyzeComparators(
 ): Promise<ComparatorAnalysis | null> {
   try {
     const genAI = getAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `Analyze comparator evidence:\nMisconduct: ${allegedMisconduct}\nDiscipline: ${yourDiscipline}\nComparators: ${JSON.stringify(comparators)}`;
 
@@ -463,7 +463,7 @@ export async function analyzePretext(
 } | null> {
   try {
     const genAI = getAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `Analyze pretext:\nStated: ${statedReason}\nActual: ${actualReason}\nEvidence: ${evidence}\nComparators: ${comparators}`;
 
@@ -489,7 +489,7 @@ export async function generateComplaintDraft(
 ): Promise<string | null> {
   try {
     const genAI = getAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `Draft a formal ${complaintType} complaint based on this analysis and original complaint:
     
@@ -514,7 +514,7 @@ export async function generateDiscoveryRequest(
 ): Promise<string | null> {
   try {
     const genAI = getAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const discoveryNeeds = questions.filter(q => q.needDiscovery).map(q => ({
       question: q.question,
