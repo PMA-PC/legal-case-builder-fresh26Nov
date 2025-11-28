@@ -26,34 +26,38 @@ if (!apiKey) {
 
 console.log("✅ API Key found (starts with):", apiKey.substring(0, 5) + "...");
 
-// Note: The GoogleGenerativeAI SDK doesn't expose listModels directly in the main class easily in all versions.
-// We will try a direct fetch to the REST API to list models to be sure.
-async function listModels() {
-    console.log("\nFetching available models via REST API...");
-    const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
-
+async function testModel(modelName) {
+    console.log(`\nTesting connectivity for model: ${modelName}`);
     try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        if (data.models) {
-            console.log("\n📋 Available Models:");
-            data.models.forEach(m => {
-                if (m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent")) {
-                    console.log(`- ${m.name} (Display: ${m.displayName})`);
-                }
-            });
-            return data.models;
-        } else {
-            console.log("❌ No models found in response.");
-            return [];
-        }
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: modelName });
+
+        const prompt = "Hello, what is your name?";
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        console.log(`✅ Successfully connected to ${modelName}. Response: ${text.substring(0, 50)}...`);
+        return true;
     } catch (error) {
-        console.error("❌ Error listing models:", error.message);
-        return [];
+        console.error(`❌ Failed to connect to ${modelName}:`, error.message);
+        return false;
     }
 }
 
-listModels();
+async function runTests() {
+    // Test specific model we want to use
+    const modelsToTest = ["gemini-2.0-flash"];
+
+    console.log("Starting model connectivity tests...");
+
+    for (const model of modelsToTest) {
+        const success = await testModel(model);
+        if (success) {
+            console.log(`\n🎉 RECOMMENDED FIX: Use model '${model}' in your code.`);
+            return;
+        }
+    }
+    console.log("\n❌ All models failed.");
+}
+
+runTests();

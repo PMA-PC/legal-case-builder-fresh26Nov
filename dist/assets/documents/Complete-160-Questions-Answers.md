@@ -859,13 +859,13 @@ MGA Insurance Company Inc / GAINSCO Auto Insurance
 
 ### Question 93: How many employees does/did the company have (must be 15+ for EEOC jurisdiction)?
 
-500+ (Estimated based on company size)
+
 
 ---
 
 ### Question 94: What was your annual salary/compensation?
 
-$129,327
+
 
 ---
 
@@ -885,25 +885,25 @@ Autism Spectrum Disorder
 
 ### Question 97: When were you formally diagnosed?
 
-July 2025 (Formal diagnosis provided in medical letters)
+
 
 ---
 
 ### Question 98: Who provided your diagnosis (healthcare provider name)?
 
-Ayla Jenson Naughton, MSN, APRN, PMHNP-BC
+
 
 ---
 
 ### Question 99: Do you have medical documentation supporting your diagnosis?
 
-Yes - Medical letters dated July 1 and July 29, 2025
+
 
 ---
 
 ### Question 100: Does your disability substantially limit one or more major life activities?
 
-Yes - Limits sensory processing, executive functioning, and social interaction in high-stimulus environments.
+
 
 ---
 
@@ -919,7 +919,7 @@ July 2025
 
 ### Question 102: Are they in different protected classes (age, race, gender, orientation)?
 
-Yes - Franco Glaze (Black Male, younger), Kim Price (Black Female, younger). Both non-disabled.
+
 
 ---
 
@@ -1008,13 +1008,6 @@ Stephanie Pathak (HR Business Partner) and Sola Opeola (Associate General Counse
 ### Question 116: Nature of Complaint
 
 Discrimination based on sexual orientation, age, and beliefs; hostile work environment causing stress and anxiety; retaliation for advising against bias; pay/title inequity compared to peers; additional role responsibilities without support or compensation; unobtainable metrics and goals; reduction in scope and workforce.
-
----
-
-### Question 32: Describe any changes in your job duties or environment prior to termination.
-
-**Answer**:
-Job title reduction, then scope reduction, then left out of meeting, embarrassed by not knowing side discussions that were happening without my knowledge with my account, adverse opinions formed about my performance and ability, additional hardship by taking away resources known to support the team, additional workload and requests that were previously for a lower grade employee to complete, accommodation denial, and finally termination. causing stress and anxiety; retaliation for advising against bias; pay/title inequity compared to peers; additional role responsibilities without support or compensation; unobtainable metrics and goals; reduction in scope and workforce.
 
 ---
 
@@ -1621,42 +1614,6 @@ Upon termination on September 17, 2025, I lost:
 - Life insurance coverage
 - Short/long-term disability insurance
 - Professional development opportunities
-
----
-
-
-
----
-
-## SECTION: PROFESSIONAL PROFILE & CHARACTER
-
-### Question 200: Provide a Professional Profile summary based on historical performance.
-
-**Professional Profile**:
-Joshua D. Shipman is a high-performing Claims Manager with over 9 years of tenure at GAINSCO.
-- **Key Strengths**: Creativity, Critical Understanding, Execution & Operational Excellence, Drive, Perseverance.
-- **Track Record**: Consistently rated 'Exceeds Expectations' (2021-2023).
-- **Leadership**: Successfully rebuilt the 'Fast Lane' division during the Great Resignation; managed Total Loss and QRM divisions.
-- **Innovation**: Known for thoughtful leadership and creative solutions to business challenges (e.g., PD split, PD subro centralization).
-- **Work Ethic**: Described as having a 'tireless work ethic' and strong desire for responsibility.
-
-*Source: Shipman_Historical.pptx, Performance Reviews 2021-2023*
-
----
-
-### Question 201: Describe the 'Championship Characteristics' and Character evidence.
-
-**Championship Characteristics**:
-1. **Creativity**: Rated 'Exceeds'. Thoughtful leader who tackles business problems creatively.
-2. **Critical Understanding**: Rated 'Exceeds'. Strong awareness of business improvement needs.
-3. **Execution**: Ability to execute at the highest level; drives high performance.
-4. **Drive**: Strong desire to succeed and focus on team excellence.
-5. **Perseverance**: Drives solutions through obstacles (e.g., MO Subro centralization).
-
-**Character Reference**:
-Colleagues and former supervisors (like Mark Hayes) describe Mr. Shipman as a 'passionate' leader whose dedication can sometimes be misinterpreted but is rooted in a deep commitment to excellence. He has a history of mentoring others and stepping up to handle complex challenges when the company needed it most.
-
-*Source: Shipman_Historical.pptx, 2022-2023 Mid-Year Reviews*
 
 ---
 

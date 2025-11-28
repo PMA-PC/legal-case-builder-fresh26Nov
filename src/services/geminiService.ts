@@ -14,20 +14,7 @@ const getAI = () => {
 };
 
 // Helper to clean JSON string
-const cleanJson = (text: string): string => {
-  // Try to find markdown code block
-  const match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-  if (match) {
-    return match[1].trim();
-  }
-  // If no code block, try to find the first '{' and last '}'
-  const firstOpen = text.indexOf('{');
-  const lastClose = text.lastIndexOf('}');
-  if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
-    return text.substring(firstOpen, lastClose + 1);
-  }
-  return text.trim();
-};
+
 
 export async function analyzeCase(
   complaintText: string,
@@ -51,6 +38,33 @@ export async function analyzeCase(
     Handbook URL: ${handbookUrl}
     
     Provide a comprehensive legal analysis in JSON format.
+    
+    The JSON output MUST strictly follow this schema:
+    {
+      "statedAllegations": [
+        { "claim": "string", "summary": "string", "evidenceMentioned": ["string"], "texasCaseExamples": ["string"] }
+      ],
+      "unstatedClaims": [
+        { "claim": "string", "justification": "string", "texasCaseExamples": ["string"] }
+      ],
+      "informationGaps": [
+        { "description": "string", "whyNeeded": "string", "recommendedAction": "string" }
+      ],
+      "responseStrategies": [
+        {
+          "allegation": "string",
+          "strategy": "string",
+          "evidenceToGather": [
+            { "description": "string", "source": "string", "purpose": "string" }
+          ]
+        }
+      ],
+      "goodFaithConferenceGuide": {
+        "documentRequests": [
+          { "category": "string", "item": "string", "rationale": "string" }
+        ]
+      }
+    }
     `;
 
     const result = await model.generateContent({
@@ -65,12 +79,14 @@ export async function analyzeCase(
     console.log("Raw Gemini response:", rawText);
 
     const jsonText = cleanJson(rawText);
-    return JSON.parse(jsonText) as AnalysisResults;
+    try {
+      return JSON.parse(jsonText) as AnalysisResults;
+    } catch (parseError: any) {
+      throw new Error(`JSON Parsing Failed: ${parseError.message}. Raw text length: ${rawText.length}`);
+    }
   } catch (error: any) {
     console.error("Error analyzing case:", error);
-    console.error("Raw Text was:", rawText);
-    alert(`DEBUG: Error analyzing case. \nError: ${error.message}\n\nRaw Response Start: ${rawText.substring(0, 500)}`);
-    return null;
+    throw error; // Propagate error to App.tsx for display
   }
 }
 
@@ -79,6 +95,7 @@ export async function getImprovementSuggestions(
   sectionContent: string,
   originalComplaint: string
 ): Promise<string | null> {
+  let rawText = '';
   try {
     const genAI = getAI();
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
@@ -508,6 +525,9 @@ export async function generateComplaintDraft(
   }
 }
 
+
+
+
 export async function generateDiscoveryRequest(
   analysis: AnalysisResults,
   questions: any[] // Pass the questions with discovery needs
@@ -537,4 +557,29 @@ export async function generateDiscoveryRequest(
     console.error("Error generating discovery request:", error);
     return null;
   }
+}
+function cleanJson(text: string): string {
+  // 1. Remove Markdown code blocks
+  let cleanText = text.replace(/```json/g, '').replace(/```/g, '');
+
+  // 2. Remove any text before the first '{' and after the last '}'
+  const firstOpen = cleanText.indexOf('{');
+  const lastClose = cleanText.lastIndexOf('}');
+  if (firstOpen !== -1 && lastClose !== -1) {
+    cleanText = cleanText.substring(firstOpen, lastClose + 1);
+  }
+
+  // 3. Fix unquoted keys (common AI error: key: "value" -> "key": "value")
+  cleanText = cleanText.replace(/([{,]\s*)([a-zA-Z0-9_]+)(\s*:)/g, '$1"$2"$3');
+
+  // 4. Fix missing commas between properties (e.g. "val" "key":)
+  cleanText = cleanText.replace(/("\s*)(?=")/g, '$1,');
+
+  // 5. Fix missing commas between objects (e.g. } {)
+  cleanText = cleanText.replace(/(}\s*)(?={)/g, '$1,');
+
+  // 6. Fix missing commas between array items (e.g. ] { or ] ")
+  cleanText = cleanText.replace(/(]\s*)(?=[{\[])/g, '$1,');
+
+  return cleanText;
 }

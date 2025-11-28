@@ -45,14 +45,14 @@ const DemandLetter: React.FC<DemandLetterProps> = ({ analysisResults, complaintT
       setIsLoading(false);
     }
   };
-  
+
   // Attachments collection logic (same as in AnalysisDisplay)
   const collectAllAttachments = useCallback((analysis: AnalysisResults): string[] => {
     const attachmentNames: Set<string> = new Set();
     if (analysis?.responseStrategies) {
-      analysis.responseStrategies.forEach(strategy => {
-        strategy.instances.forEach(instance => {
-          instance.attachments.forEach(attachment => {
+      (analysis.responseStrategies || []).forEach(strategy => {
+        (strategy.instances || []).forEach(instance => {
+          (instance.attachments || []).forEach(attachment => {
             attachmentNames.add(attachment.name);
           });
         });
@@ -69,8 +69,8 @@ const DemandLetter: React.FC<DemandLetterProps> = ({ analysisResults, complaintT
 
     const allAttachments = collectAllAttachments(analysisResults);
     const attachmentListText = allAttachments.length > 0
-        ? allAttachments.map(name => `- ${name}`).join('\n')
-        : `- No specific attachments identified for this communication, but review your evidence board for relevant documents -`;
+      ? allAttachments.map(name => `- ${name}`).join('\n')
+      : `- No specific attachments identified for this communication, but review your evidence board for relevant documents -`;
 
     const attachmentNote = `\n\n--- NOTE: The following documents were identified as relevant and should be manually attached. Please ensure they are included with this communication. ---\n${attachmentListText}\n`;
 
@@ -78,9 +78,9 @@ const DemandLetter: React.FC<DemandLetterProps> = ({ analysisResults, complaintT
     const placeholderRegex = /\[\s*(ATTACHMENTS|DOCUMENTS|EVIDENCE|ATTACHMENT LIST)\s*\]/gi;
 
     if (placeholderRegex.test(letter)) {
-        contentToExport = letter.replace(placeholderRegex, attachmentNote);
+      contentToExport = letter.replace(placeholderRegex, attachmentNote);
     } else {
-        contentToExport += attachmentNote;
+      contentToExport += attachmentNote;
     }
 
     const fileName = `${tone === 'demand' ? 'Demand_Letter' : 'Settlement_Proposal'}.txt`;
@@ -114,14 +114,14 @@ const DemandLetter: React.FC<DemandLetterProps> = ({ analysisResults, complaintT
 
       <div className="max-w-md mx-auto">
         <div role="radiogroup" aria-label="Select letter tone" className="flex space-x-2 rounded-lg bg-gray-200 dark:bg-gray-700 p-1 mb-6 text-center">
-            <button role="radio" aria-checked={tone === 'demand'} onClick={() => setTone('demand')} className={`w-full px-3 py-2 text-sm font-medium rounded-md transition ${tone === 'demand' ? 'bg-white dark:bg-gray-900 shadow text-blue-600' : 'text-gray-600 dark:text-gray-300'}`}>
-                <span className="font-bold">Use Demand Tone</span>
-                <span className="block text-xs">Formal, assertive, and ready to litigate.</span>
-            </button>
-            <button role="radio" aria-checked={tone === 'settlement'} onClick={() => setTone('settlement')} className={`w-full px-3 py-2 text-sm font-medium rounded-md transition ${tone === 'settlement' ? 'bg-white dark:bg-gray-900 shadow text-blue-600' : 'text-gray-600 dark:text-gray-300'}`}>
-                <span className="font-bold">Use Settlement Tone</span>
-                <span className="block text-xs">Courteous, cooperative, seeks early resolution.</span>
-            </button>
+          <button role="radio" aria-checked={tone === 'demand'} onClick={() => setTone('demand')} className={`w-full px-3 py-2 text-sm font-medium rounded-md transition ${tone === 'demand' ? 'bg-white dark:bg-gray-900 shadow text-blue-600' : 'text-gray-600 dark:text-gray-300'}`}>
+            <span className="font-bold">Use Demand Tone</span>
+            <span className="block text-xs">Formal, assertive, and ready to litigate.</span>
+          </button>
+          <button role="radio" aria-checked={tone === 'settlement'} onClick={() => setTone('settlement')} className={`w-full px-3 py-2 text-sm font-medium rounded-md transition ${tone === 'settlement' ? 'bg-white dark:bg-gray-900 shadow text-blue-600' : 'text-gray-600 dark:text-gray-300'}`}>
+            <span className="font-bold">Use Settlement Tone</span>
+            <span className="block text-xs">Courteous, cooperative, seeks early resolution.</span>
+          </button>
         </div>
       </div>
 
@@ -145,25 +145,25 @@ const DemandLetter: React.FC<DemandLetterProps> = ({ analysisResults, complaintT
             {letter}
           </div>
           <div className="mt-6 flex justify-end space-x-4">
-             <button
-                onClick={handleGenerate}
-                disabled={isLoading}
-                className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-             >
-                {isLoading ? 'Regenerating...' : 'Regenerate'}
-             </button>
-             <button
-                onClick={handleExportGeneratedLetter} // Changed to local export handler
-                className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-             >
-                Export Letter
-             </button>
-             <button
-                onClick={handleCopyToClipboard}
-                className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700"
-             >
-                Copy to Clipboard
-             </button>
+            <button
+              onClick={handleGenerate}
+              disabled={isLoading}
+              className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            >
+              {isLoading ? 'Regenerating...' : 'Regenerate'}
+            </button>
+            <button
+              onClick={handleExportGeneratedLetter} // Changed to local export handler
+              className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+            >
+              Export Letter
+            </button>
+            <button
+              onClick={handleCopyToClipboard}
+              className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700"
+            >
+              Copy to Clipboard
+            </button>
           </div>
         </div>
       )}

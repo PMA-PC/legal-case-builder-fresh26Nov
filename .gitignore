@@ -1,4 +1,6 @@
 node_modules
 _TO_BE_DELETED
-
 .vercel
+.env
+.env.local
+dist

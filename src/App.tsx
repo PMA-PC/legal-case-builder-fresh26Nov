@@ -248,7 +248,8 @@ const Header: React.FC<{
   setShowLogin: (show: boolean) => void;
   handleLoadReferenceData: () => void;
   handleClearData: () => void;
-}> = ({ user, handleLogout, setShowLogin, handleLoadReferenceData, handleClearData }) => (
+  handleExportAnalysis: () => void;
+}> = ({ user, handleLogout, setShowLogin, handleLoadReferenceData, handleClearData, handleExportAnalysis }) => (
   <header className="bg-white dark:bg-gray-800 shadow-md">
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <div className="flex items-center justify-between">
@@ -280,6 +281,12 @@ const Header: React.FC<{
             className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-100 rounded-lg hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800"
           >
             Load Reference Data
+          </button>
+          <button
+            onClick={handleExportAnalysis}
+            className="px-4 py-2 text-sm font-medium text-green-600 bg-green-100 rounded-lg hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800"
+          >
+            Export Analysis
           </button>
           <button
             onClick={handleClearData}
@@ -542,12 +549,21 @@ const App: React.FC = () => {
         }
         const augmentedResults: AnalysisResults = {
           ...results,
-          responseStrategies: results.responseStrategies.map(strategy => ({
+          statedAllegations: results.statedAllegations || [],
+          unstatedClaims: results.unstatedClaims || [],
+          handbookPolicyViolations: results.handbookPolicyViolations || [],
+          goodFaithConferenceGuide: results.goodFaithConferenceGuide ? {
+            ...results.goodFaithConferenceGuide,
+            keyTopics: results.goodFaithConferenceGuide.keyTopics || [],
+            documentRequests: results.goodFaithConferenceGuide.documentRequests || [],
+            draftCommunications: results.goodFaithConferenceGuide.draftCommunications || []
+          } : undefined,
+          responseStrategies: (results.responseStrategies || []).map(strategy => ({
             ...(strategy as ResponseStrategy),
             instances: [],
-            evidenceToGather: strategy.evidenceToGather.map(e => ({ ...e, linkedEvidenceIds: [] })) // Initialize linkedEvidenceIds
+            evidenceToGather: (strategy.evidenceToGather || []).map(e => ({ ...e, linkedEvidenceIds: [] })) // Initialize linkedEvidenceIds
           })),
-          boardState: initializeBoardState(results.statedAllegations),
+          boardState: initializeBoardState(results.statedAllegations || []),
         };
         setCaseData(prev => ({ ...prev, analysis: augmentedResults }));
         setCaseData(prev => ({ ...prev, analysis: augmentedResults }));
@@ -555,8 +571,8 @@ const App: React.FC = () => {
       } else {
         setError("Failed to get analysis from the AI. Please check the console for details.");
       }
-    } catch (err) {
-      setError("An unexpected error occurred during analysis.");
+    } catch (err: any) {
+      setError(`Analysis Error: ${err.message || "An unexpected error occurred."}`);
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -612,6 +628,20 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleExportAnalysis = () => {
+    if (!caseData.analysis) {
+      alert("No analysis data to export. Please run the analysis first.");
+      return;
+    }
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(caseData.analysis, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "legal_case_analysis.json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
   };
 
   // --- Instance Handlers ---
@@ -726,8 +756,15 @@ const App: React.FC = () => {
   }, []);
 
   // --- AI Suggestion Handler ---
-  const handleGetSuggestions = useCallback(async (sectionKey: keyof AnalysisResults, sectionTitle: string) => {
+  const handleGetSuggestions = useCallback(async (sectionKey: string, sectionTitle: string) => {
     if (!analysis) return;
+
+    // Parse composite key (e.g., "statedAllegations|0")
+    const [mainKey, indexStr] = sectionKey.split('|');
+    const index = indexStr ? parseInt(indexStr, 10) : -1;
+    const isComposite = index !== -1;
+    const actualKey = isComposite ? mainKey as keyof AnalysisResults : sectionKey as keyof AnalysisResults;
+
     setIsSuggesting(prev => ({ ...prev, [sectionKey]: true }));
     setCaseData(prev => ({
       ...prev,
@@ -739,46 +776,104 @@ const App: React.FC = () => {
 
     let sectionContent = '';
 
-    switch (sectionKey) {
-      case 'statedAllegations':
-        sectionContent = JSON.stringify(analysis.statedAllegations, null, 2);
-        break;
-      case 'unstatedClaims':
-        sectionContent = JSON.stringify(analysis.unstatedClaims, null, 2);
-        break;
-      case 'informationGaps':
-        sectionContent = JSON.stringify(analysis.informationGaps, null, 2);
-        break;
-      case 'investigatorQuestions':
-        sectionContent = JSON.stringify(analysis.investigatorQuestions, null, 2);
-        break;
-      case 'quantitativeDataPrompts':
-        sectionContent = JSON.stringify(analysis.quantitativeDataPrompts, null, 2);
-        break;
-      case 'cultureShiftQuestions':
-        sectionContent = JSON.stringify(analysis.cultureShiftQuestions, null, 2);
-        break;
-      case 'culturePortraitQuestions':
-        sectionContent = JSON.stringify(analysis.culturePortraitQuestions, null, 2);
-        break;
-      case 'adaAccommodationQuestions':
-        sectionContent = JSON.stringify(analysis.adaAccommodationQuestions, null, 2);
-        break;
-      case 'handbookPolicyViolations':
-        sectionContent = JSON.stringify(analysis.handbookPolicyViolations, null, 2);
-        break;
-      case 'goodFaithConferenceGuide':
-        sectionContent = JSON.stringify(analysis.goodFaithConferenceGuide, null, 2);
-        break;
-      case 'responseStrategies':
-        sectionContent = JSON.stringify(analysis.responseStrategies.map(({ instances, ...rest }) => rest), null, 2);
-        break;
-      default:
-        sectionContent = ''; // Should not happen with current sectionKeys
+    if (isComposite) {
+      // Handle specific item analysis
+      switch (actualKey) {
+        case 'statedAllegations':
+          sectionContent = JSON.stringify(analysis.statedAllegations[index], null, 2);
+          break;
+        case 'unstatedClaims':
+          sectionContent = JSON.stringify(analysis.unstatedClaims[index], null, 2);
+          break;
+        case 'informationGaps':
+          sectionContent = JSON.stringify(analysis.informationGaps[index], null, 2);
+          break;
+        case 'investigatorQuestions':
+          sectionContent = JSON.stringify(analysis.investigatorQuestions[index], null, 2);
+          break;
+        case 'quantitativeDataPrompts':
+          sectionContent = JSON.stringify(analysis.quantitativeDataPrompts[index], null, 2);
+          break;
+        case 'cultureShiftQuestions':
+          sectionContent = JSON.stringify(analysis.cultureShiftQuestions[index], null, 2);
+          break;
+        case 'culturePortraitQuestions':
+          sectionContent = JSON.stringify(analysis.culturePortraitQuestions[index], null, 2);
+          break;
+        case 'adaAccommodationQuestions':
+          sectionContent = JSON.stringify(analysis.adaAccommodationQuestions[index], null, 2);
+          break;
+        case 'handbookPolicyViolations':
+          sectionContent = JSON.stringify(analysis.handbookPolicyViolations[index], null, 2);
+          break;
+        case 'responseStrategies':
+          // For response strategies, we might want to analyze the strategy itself
+          const strategy = analysis.responseStrategies[index];
+          if (strategy) {
+            const { instances, ...rest } = strategy;
+            sectionContent = JSON.stringify(rest, null, 2);
+          }
+          break;
+        default:
+          sectionContent = '';
+      }
+    } else {
+      // Handle full section analysis (legacy support or specific sections)
+      switch (sectionKey) {
+        case 'statedAllegations':
+          sectionContent = JSON.stringify(analysis.statedAllegations, null, 2);
+          break;
+        case 'unstatedClaims':
+          sectionContent = JSON.stringify(analysis.unstatedClaims, null, 2);
+          break;
+        case 'informationGaps':
+          sectionContent = JSON.stringify(analysis.informationGaps, null, 2);
+          break;
+        case 'investigatorQuestions':
+          sectionContent = JSON.stringify(analysis.investigatorQuestions, null, 2);
+          break;
+        case 'quantitativeDataPrompts':
+          sectionContent = JSON.stringify(analysis.quantitativeDataPrompts, null, 2);
+          break;
+        case 'cultureShiftQuestions':
+          sectionContent = JSON.stringify(analysis.cultureShiftQuestions, null, 2);
+          break;
+        case 'culturePortraitQuestions':
+          sectionContent = JSON.stringify(analysis.culturePortraitQuestions, null, 2);
+          break;
+        case 'adaAccommodationQuestions':
+          sectionContent = JSON.stringify(analysis.adaAccommodationQuestions, null, 2);
+          break;
+        case 'handbookPolicyViolations':
+          sectionContent = JSON.stringify(analysis.handbookPolicyViolations, null, 2);
+          break;
+        case 'goodFaithConferenceGuide':
+          sectionContent = JSON.stringify(analysis.goodFaithConferenceGuide, null, 2);
+          break;
+        case 'responseStrategies':
+          sectionContent = JSON.stringify(analysis.responseStrategies.map(({ instances, ...rest }) => rest), null, 2);
+          break;
+        default:
+          sectionContent = '';
+      }
     }
 
+    // Aggregate Q&A data
+    const qaContext = questions
+      .filter(q => q.answer && q.answer.trim() !== '')
+      .map(q => `Question: ${q.question}\nAnswer: ${q.answer}`)
+      .join('\n\n');
+
+    const fullContext = `
+      Original Complaint Narrative:
+      ${complaintText}
+
+      Detailed Q&A Responses:
+      ${qaContext}
+    `;
+
     try {
-      const result = await getImprovementSuggestions(sectionTitle, sectionContent, complaintText);
+      const result = await getImprovementSuggestions(sectionTitle, sectionContent, fullContext);
       if (result) {
         setCaseData(prev => ({
           ...prev,
@@ -1202,6 +1297,7 @@ const App: React.FC = () => {
         setShowLogin={setShowLogin}
         handleLoadReferenceData={handleLoadReferenceData}
         handleClearData={handleClearData}
+        handleExportAnalysis={handleExportAnalysis}
       />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-4xl mx-auto space-y-8">
@@ -1558,26 +1654,32 @@ const App: React.FC = () => {
                 {analysis && (
                   <>
                     <div className={`${activeTab === 'investigation' ? 'block' : 'hidden'}`} role="tabpanel">
-                      <AnalysisDisplay
-                        analysisResults={analysis}
-                        onAddInstance={handleAddInstance}
-                        onDeleteInstance={handleDeleteInstance}
-                        onUpdateInstanceNotes={handleUpdateInstanceNotes}
-                        onAddAttachments={handleAddAttachments}
-                        onDeleteAttachment={handleDeleteAttachment}
-                        onGetSuggestions={handleGetSuggestions}
-                        suggestions={suggestions}
-                        isSuggesting={isSuggesting}
-                        onMoveUnstatedClaim={handleMoveUnstatedClaim}
-                        onAddDocumentRequest={handleAddDocumentRequest}
-                        onUpdateDocumentRequest={handleUpdateDocumentRequest}
-                        onDeleteDocumentRequest={handleDeleteDocumentRequest}
-                        onExportSection={handleExportSection}
-                        onUpdateUserNotes={handleUpdateUserNotes}
-                        onUpdateStatedAllegationEvidenceMentioned={handleUpdateStatedAllegationEvidenceMentioned}
-                        allBoardEvidence={analysis.boardState?.evidence || {}}
-                        onLinkEvidenceToStrategy={handleLinkEvidenceToStrategy}
-                      />
+                      {analysis ? (
+                        <AnalysisDisplay
+                          analysisResults={analysis}
+                          onAddInstance={handleAddInstance}
+                          onDeleteInstance={handleDeleteInstance}
+                          onUpdateInstanceNotes={handleUpdateInstanceNotes}
+                          onAddAttachments={handleAddAttachments}
+                          onDeleteAttachment={handleDeleteAttachment}
+                          onUpdateStatedAllegationEvidenceMentioned={handleUpdateStatedAllegationEvidenceMentioned}
+                          allBoardEvidence={analysis.boardState.evidence}
+                          onLinkEvidenceToStrategy={handleLinkEvidenceToStrategy}
+                          onGetSuggestions={handleGetSuggestions}
+                          suggestions={suggestions}
+                          isSuggesting={isSuggesting}
+                          onMoveUnstatedClaim={handleMoveUnstatedClaim}
+                          onAddDocumentRequest={handleAddDocumentRequest}
+                          onUpdateDocumentRequest={handleUpdateDocumentRequest}
+                          onDeleteDocumentRequest={handleDeleteDocumentRequest}
+                          onExportSection={handleExportSection}
+                          onUpdateUserNotes={handleUpdateUserNotes}
+                        />
+                      ) : (
+                        <div className="p-8 text-center text-gray-500">
+                          No analysis data available. Please run the analysis again.
+                        </div>
+                      )}
                       <FollowUpQuestions
                         results={analysis}
                         onGetSuggestions={handleGetSuggestions}
