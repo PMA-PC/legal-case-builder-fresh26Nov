@@ -14,7 +14,24 @@ export const LegalStrategyCenter: React.FC<Props> = ({ analysisData, onBack }) =
     const [activeTab, setActiveTab] = useState<string>('dashboard');
 
     const initializeStrategy = async () => {
-        if (!analysisData) {
+        let currentAnalysis = analysisData;
+
+        // If no analysis data passed in, try to fetch the seed file
+        if (!currentAnalysis) {
+            try {
+                const res = await fetch('/assets/legal_case_analysis.json');
+                if (res.ok) {
+                    const json = await res.json();
+                    // The file structure might be { analysis: ... } or just the analysis object
+                    // Based on previous capture, it was caseData.analysis, so likely just the AnalysisResults object
+                    currentAnalysis = json;
+                }
+            } catch (e) {
+                console.warn("Could not load seed analysis:", e);
+            }
+        }
+
+        if (!currentAnalysis) {
             alert("No analysis data found. Please click 'Load Reference Data' or run a new analysis first.");
             return;
         }
@@ -26,7 +43,7 @@ export const LegalStrategyCenter: React.FC<Props> = ({ analysisData, onBack }) =
             const qaMarkdown = await response.text();
 
             const graph = await legalStrategyService.ingestData(
-                { analysis: analysisData },
+                { analysis: currentAnalysis },
                 "",
                 qaMarkdown
             );
