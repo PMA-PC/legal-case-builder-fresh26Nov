@@ -29,10 +29,10 @@ import ArbitrationAnalyzer from './components/ArbitrationAnalyzer';
 import TimelineBuilder from './components/TimelineBuilder';
 import DamagesCalculator from './components/DamagesCalculator';
 import ComparatorModule from './components/ComparatorModule';
-
+import PretextAnalyzer from './components/PretextAnalyzer';
+import { LegalStrategyCenter } from './components/LegalStrategyCenter';
 import CharacterProfileBuilder from './components/CharacterProfileBuilder';
 import DocumentUploader from './components/DocumentUploader';
-// import PretextAnalyzer from './components/PretextAnalyzer';
 import { parseReferenceData } from './utils/parseReferenceData';
 import { useAuth } from './AuthContext';
 import { saveCaseData, loadCaseData, supabase } from './services/supabaseService';
@@ -249,7 +249,9 @@ const Header: React.FC<{
   handleLoadReferenceData: () => void;
   handleClearData: () => void;
   handleExportAnalysis: () => void;
-}> = ({ user, handleLogout, setShowLogin, handleLoadReferenceData, handleClearData, handleExportAnalysis }) => (
+  onToggleStrategy: () => void;
+  showStrategy: boolean;
+}> = ({ user, handleLogout, setShowLogin, handleLoadReferenceData, handleClearData, handleExportAnalysis, onToggleStrategy, showStrategy }) => (
   <header className="bg-white dark:bg-gray-800 shadow-md">
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <div className="flex items-center justify-between">
@@ -287,6 +289,12 @@ const Header: React.FC<{
             className="px-4 py-2 text-sm font-medium text-green-600 bg-green-100 rounded-lg hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800"
           >
             Export Analysis
+          </button>
+          <button
+            onClick={onToggleStrategy}
+            className={`px-4 py-2 text-sm font-medium rounded-lg ${showStrategy ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'text-indigo-600 bg-indigo-100 hover:bg-indigo-200'} dark:bg-indigo-900 dark:text-indigo-300`}
+          >
+            {showStrategy ? 'Back to Classic' : 'Strategy Center'}
           </button>
           <button
             onClick={handleClearData}
@@ -346,6 +354,7 @@ const App: React.FC = () => {
   const [discoveryStatuses, setDiscoveryStatuses] = useState<Record<number, { needDiscovery: boolean; haveEvidence: boolean }>>({});
 
   const { user, loading: authLoading, showLogin, setShowLogin } = useAuth();
+  const [showStrategyCenter, setShowStrategyCenter] = useState(false); // Added new state
 
   const { analysis, complaintText, jobDescriptionText, actualDutiesText, characterProfileText, handbookUrl, suggestions } = caseData;
 
@@ -1298,343 +1307,354 @@ const App: React.FC = () => {
         handleLoadReferenceData={handleLoadReferenceData}
         handleClearData={handleClearData}
         handleExportAnalysis={handleExportAnalysis}
+        onToggleStrategy={() => setShowStrategyCenter(!showStrategyCenter)}
+        showStrategy={showStrategyCenter}
       />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* Main Navigation Tabs (Pre-Analysis) */}
-          {(!analysis || activeTab === 'input' || activeTab === 'files') && (
-            <div className="flex space-x-4 mb-6 border-b border-gray-200 dark:border-gray-700">
-              <button
-                onClick={() => setActiveTab('input')}
-                className={`pb-2 px-4 font-medium text-lg transition-colors ${activeTab === 'input'
-                  ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400'
-                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-                  }`}
-              >
-                Case Details
-              </button>
-              <button
-                onClick={() => setActiveTab('files')}
-                className={`pb-2 px-4 font-medium text-lg transition-colors ${activeTab === 'files'
-                  ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400'
-                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-                  }`}
-              >
-                Case Files & Evidence
-              </button>
-            </div>
-          )}
 
-          {activeTab === 'input' && (
-            <section className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Case Details</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Provide as much detail as possible in the fields below. The more information the AI has, the more accurate and comprehensive your analysis will be.
-              </p>
-
-              <div className="space-y-4">
-                <InputSection
-                  title="Your Complaint & Grievances"
-                  value={complaintText}
-                  onChange={(e) => setCaseData(prev => ({ ...prev, complaintText: e.target.value }))}
-                  placeholder="Describe your employment, the issues you faced, formal complaints, and details of your termination. Include dates, names, and specific events."
-                  sectionKey="complaintText"
-                  isOpen={openAccordion === 'complaintText'}
-                  onToggle={() => handleAccordionToggle('complaintText')}
-                />
-
-                <InputSection
-                  title="Official Job Description (Manager 1)"
-                  value={jobDescriptionText}
-                  onChange={(e) => setCaseData(prev => ({ ...prev, jobDescriptionText: e.target.value }))}
-                  placeholder="Paste your official job description here. This will be compared against your actual duties."
-                  sectionKey="jobDescriptionText"
-                  isOpen={openAccordion === 'jobDescriptionText'}
-                  onToggle={() => handleAccordionToggle('jobDescriptionText')}
-                />
-
-                <InputSection
-                  title="Actual Duties Performed"
-                  value={actualDutiesText}
-                  onChange={(e) => setCaseData(prev => ({ ...prev, actualDutiesText: e.target.value }))}
-                  placeholder="Detail your day-to-day responsibilities, projects, team size managed, and any duties that exceeded your official job description."
-                  sectionKey="actualDutiesText"
-                  isOpen={openAccordion === 'actualDutiesText'}
-                  onToggle={() => handleAccordionToggle('actualDutiesText')}
-                />
-
-                <InputSection
-                  title="Professional Profile & Character"
-                  value={characterProfileText}
-                  onChange={(e) => setCaseData(prev => ({ ...prev, characterProfileText: e.target.value }))}
-                  placeholder="Describe your professional history, performance reviews, awards, disciplinary record (or lack thereof), attendance, and general character. This is crucial for building a 'model employee' narrative."
-                  sectionKey="characterProfileText"
-                  isOpen={openAccordion === 'characterProfileText'}
-                  onToggle={() => handleAccordionToggle('characterProfileText')}
-                />
-              </div>
-
-              <div className="flex justify-end mt-8">
+      {showStrategyCenter ? (
+        <div className="h-[calc(100vh-80px)]">
+          <LegalStrategyCenter
+            analysisData={caseData.analysis}
+            onBack={() => setShowStrategyCenter(false)}
+          />
+        </div>
+      ) : (
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-4xl mx-auto space-y-8">
+            {/* Main Navigation Tabs (Pre-Analysis) */}
+            {(!analysis || activeTab === 'input' || activeTab === 'files') && (
+              <div className="flex space-x-4 mb-6 border-b border-gray-200 dark:border-gray-700">
                 <button
-                  onClick={handleAnalyze}
-                  disabled={isLoading}
-                  className="btn btn-primary px-8 py-3 rounded-lg font-bold text-lg shadow-lg transform transition hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  onClick={() => setActiveTab('input')}
+                  className={`pb-2 px-4 font-medium text-lg transition-colors ${activeTab === 'input'
+                    ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                    }`}
                 >
-                  {isLoading ? (
-                    <>
-                      <Spinner /> Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      <span>🚀</span> Analyze My Case
-                    </>
-                  )}
+                  Case Details
+                </button>
+                <button
+                  onClick={() => setActiveTab('files')}
+                  className={`pb-2 px-4 font-medium text-lg transition-colors ${activeTab === 'files'
+                    ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                    }`}
+                >
+                  Case Files & Evidence
                 </button>
               </div>
+            )}
 
-              <div className="mt-8 flex justify-between items-center">
-                <button
-                  onClick={() => {
-                    if (window.confirm('Are you sure you want to clear all data? This cannot be undone.')) {
-                      setCaseData(initialCaseData);
-                      localStorage.removeItem(LOCAL_STORAGE_KEY);
-                      window.location.reload();
-                    }
-                  }}
-                  className="text-red-600 hover:text-red-800 text-sm font-medium transition"
-                >
-                  Clear All Data
-                </button>
-                <div className="flex gap-4">
+            {activeTab === 'input' && (
+              <section className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Case Details</h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  Provide as much detail as possible in the fields below. The more information the AI has, the more accurate and comprehensive your analysis will be.
+                </p>
+
+                <div className="space-y-4">
+                  <InputSection
+                    title="Your Complaint & Grievances"
+                    value={complaintText}
+                    onChange={(e) => setCaseData(prev => ({ ...prev, complaintText: e.target.value }))}
+                    placeholder="Describe your employment, the issues you faced, formal complaints, and details of your termination. Include dates, names, and specific events."
+                    sectionKey="complaintText"
+                    isOpen={openAccordion === 'complaintText'}
+                    onToggle={() => handleAccordionToggle('complaintText')}
+                  />
+
+                  <InputSection
+                    title="Official Job Description (Manager 1)"
+                    value={jobDescriptionText}
+                    onChange={(e) => setCaseData(prev => ({ ...prev, jobDescriptionText: e.target.value }))}
+                    placeholder="Paste your official job description here. This will be compared against your actual duties."
+                    sectionKey="jobDescriptionText"
+                    isOpen={openAccordion === 'jobDescriptionText'}
+                    onToggle={() => handleAccordionToggle('jobDescriptionText')}
+                  />
+
+                  <InputSection
+                    title="Actual Duties Performed"
+                    value={actualDutiesText}
+                    onChange={(e) => setCaseData(prev => ({ ...prev, actualDutiesText: e.target.value }))}
+                    placeholder="Detail your day-to-day responsibilities, projects, team size managed, and any duties that exceeded your official job description."
+                    sectionKey="actualDutiesText"
+                    isOpen={openAccordion === 'actualDutiesText'}
+                    onToggle={() => handleAccordionToggle('actualDutiesText')}
+                  />
+
+                  <InputSection
+                    title="Professional Profile & Character"
+                    value={characterProfileText}
+                    onChange={(e) => setCaseData(prev => ({ ...prev, characterProfileText: e.target.value }))}
+                    placeholder="Describe your professional history, performance reviews, awards, disciplinary record (or lack thereof), attendance, and general character. This is crucial for building a 'model employee' narrative."
+                    sectionKey="characterProfileText"
+                    isOpen={openAccordion === 'characterProfileText'}
+                    onToggle={() => handleAccordionToggle('characterProfileText')}
+                  />
+                </div>
+
+                <div className="flex justify-end mt-8">
                   <button
-                    onClick={() => setActiveTab('questions')}
-                    className="px-4 py-2 text-sm font-medium rounded-md text-green-600 dark:text-green-400 border border-green-500 hover:bg-green-50 dark:hover:bg-green-900/30 transition flex items-center gap-2"
+                    onClick={handleAnalyze}
+                    disabled={isLoading}
+                    className="btn btn-primary px-8 py-3 rounded-lg font-bold text-lg shadow-lg transform transition hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   >
-                    <span>📋</span> View Questions
+                    {isLoading ? (
+                      <>
+                        <Spinner /> Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <span>🚀</span> Analyze My Case
+                      </>
+                    )}
                   </button>
                 </div>
-              </div>
 
-              {error && (
-                <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 text-red-700 dark:text-red-300">
-                  <p className="font-bold">Error</p>
-                  <p>{error}</p>
-                </div>
-              )}
-            </section>
-          )}
-
-          {activeTab === 'files' && (
-            <section className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Case Files & Evidence</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Manage your documents, upload evidence, and link external files here.
-              </p>
-
-              <div className="space-y-4">
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-white px-6 py-4 cursor-pointer flex justify-between items-center" onClick={() => handleAccordionToggle('uploadEvidence')}>
-                    Upload Evidence (Emails, Reviews, etc.)
-                    <svg className={`w-5 h-5 transition-transform ${openAccordion === 'uploadEvidence' ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </h3>
-                  {openAccordion === 'uploadEvidence' && (
-                    <div className="p-6 border-t border-gray-200 dark:border-gray-700">
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                        Upload your emails, performance reviews, and other documents here. The AI will analyze them.
-                      </p>
-                      <DocumentUploader onUpload={handleDocumentUpload} />
-                      {caseData.rawEvidence.length > 0 && (
-                        <div className="mt-4">
-                          <h4 className="font-semibold mb-2">Uploaded Documents:</h4>
-                          <ul className="list-disc pl-5">
-                            {caseData.rawEvidence.map(doc => (
-                              <li key={doc.id} className="text-sm text-gray-700 dark:text-gray-300">
-                                {doc.file.name} <span className="text-xs text-gray-500">({doc.category})</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-white px-6 py-4 cursor-pointer flex justify-between items-center" onClick={() => handleAccordionToggle('eventLog')}>
-                    Event Log (Timeline)
-                    <svg className={`w-5 h-5 transition-transform ${openAccordion === 'eventLog' ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </h3>
-                  {openAccordion === 'eventLog' && (
-                    <div className="p-6 border-t border-gray-200 dark:border-gray-700">
-                      <TimelineBuilder
-                        initialEvents={caseData.timelineEvents || []}
-                        onAnalyze={handleTimelineAnalysis}
-                        isAnalyzing={isLoading}
-                        timeline={null} // Input mode only
-                        onEventsChange={handleTimelineEventsChange}
-                      />
-                    </div>
-                  )}
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-white px-6 py-4 cursor-pointer flex justify-between items-center" onClick={() => handleAccordionToggle('projectDocuments')}>
-                    Project Documents (Local Assets)
-                    <svg className={`w-5 h-5 transition-transform ${openAccordion === 'projectDocuments' ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </h3>
-                  {openAccordion === 'projectDocuments' && (
-                    <div className="p-6 border-t border-gray-200 dark:border-gray-700">
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                        These documents are already loaded in your project. Click to view or download.
-                      </p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {Object.entries(ASSETS.documents).map(([key, path]) => (
-                          <a
-                            key={key}
-                            href={path}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition group"
-                          >
-                            <span className="text-2xl mr-3">📄</span>
-                            <div>
-                              <div className="font-semibold text-gray-800 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                                {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                              </div>
-                              <div className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px]">
-                                {path.split('/').pop()}
-                              </div>
-                            </div>
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-white px-6 py-4 cursor-pointer flex justify-between items-center" onClick={() => handleAccordionToggle('characterEvidence')}>
-                    Character Evidence & Photos
-                    <svg className={`w-5 h-5 transition-transform ${openAccordion === 'characterEvidence' ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </h3>
-                  {openAccordion === 'characterEvidence' && (
-                    <div className="p-6 border-t border-gray-200 dark:border-gray-700">
-                      <CharacterProfileBuilder
-                        profileData={caseData.characterProfileData}
-                        onProfileChange={handleProfileChange}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-white px-6 py-4 cursor-pointer flex justify-between items-center" onClick={() => handleAccordionToggle('handbookUrl')}>
-                    Employee Handbook URL (Optional)
-                    <svg className={`w-5 h-5 transition-transform ${openAccordion === 'handbookUrl' ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </h3>
-                  {openAccordion === 'handbookUrl' && (
-                    <div className="p-6 border-t border-gray-200 dark:border-gray-700">
-                      <input
-                        type="url"
-                        value={handbookUrl}
-                        onChange={(e) => setCaseData(prev => ({ ...prev, handbookUrl: e.target.value }))}
-                        placeholder="https://..."
-                        className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                      />
-                      <p className="text-sm text-gray-500 mt-2">
-                        Link to your employee handbook (Google Drive, Dropbox, etc.) for the AI to reference.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
-          )}
-          {isLoading && <Spinner />}
-
-          {((analysis && !isLoading) || activeTab === 'questions') && activeTab !== 'input' && (
-            <section>
-              <nav className="mb-8 border-b border-gray-200 dark:border-gray-700">
-                <ul className="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
-                  {analysis && (
-                    <>
-                      <li className="me-2" role="presentation">
-                        <button
-                          className={`inline-block p-4 border-b-2 rounded-t-lg ${activeTab === 'investigation' ? 'text-blue-600 border-blue-600 dark:text-blue-500 dark:border-blue-500' : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300'}`}
-                          id="investigation-tab"
-                          type="button"
-                          role="tab"
-                          aria-controls="investigation"
-                          aria-selected={activeTab === 'investigation'}
-                          onClick={() => setActiveTab('investigation')}
-                        >
-                          Investigation
-                        </button>
-                      </li>
-                      <li className="me-2" role="presentation">
-                        <button
-                          className={`inline-block p-4 border-b-2 rounded-t-lg ${activeTab === 'evidence' ? 'text-blue-600 border-blue-600 dark:text-blue-500 dark:border-blue-500' : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300'}`}
-                          id="evidence-tab"
-                          type="button"
-                          role="tab"
-                          aria-controls="evidence"
-                          aria-selected={activeTab === 'evidence'}
-                          onClick={() => setActiveTab('evidence')}
-                        >
-                          Evidence Board
-                        </button>
-                      </li>
-                      <li className="me-2" role="presentation">
-                        <button
-                          className={`inline-block p-4 border-b-2 rounded-t-lg ${activeTab === 'strategy' ? 'text-blue-600 border-blue-600 dark:text-blue-500 dark:border-blue-500' : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300'}`}
-                          id="strategy-tab"
-                          type="button"
-                          role="tab"
-                          aria-controls="strategy"
-                          aria-selected={activeTab === 'strategy'}
-                          onClick={() => setActiveTab('strategy')}
-                        >
-                          Strategy Dashboard
-                        </button>
-                      </li>
-                      <li className="me-2" role="presentation">
-                        <button
-                          className={`inline-block p-4 border-b-2 rounded-t-lg ${activeTab === 'conference' ? 'text-blue-600 border-blue-600 dark:text-blue-500 dark:border-blue-500' : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300'}`}
-                          id="conference-tab"
-                          type="button"
-                          role="tab"
-                          aria-controls="conference"
-                          aria-selected={activeTab === 'conference'}
-                          onClick={() => setActiveTab('conference')}
-                        >
-                          Conference Prep
-                        </button>
-                      </li>
-                    </>
-                  )}
-                  <li className="me-2" role="presentation">
+                <div className="mt-8 flex justify-between items-center">
+                  <button
+                    onClick={() => {
+                      if (window.confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+                        setCaseData(initialCaseData);
+                        localStorage.removeItem(LOCAL_STORAGE_KEY);
+                        window.location.reload();
+                      }
+                    }}
+                    className="text-red-600 hover:text-red-800 text-sm font-medium transition"
+                  >
+                    Clear All Data
+                  </button>
+                  <div className="flex gap-4">
                     <button
-                      className={`inline-block p-4 border-b-2 rounded-t-lg ${activeTab === 'questions' ? 'text-green-600 border-green-600 dark:text-green-500 dark:border-green-500' : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300'}`}
-                      id="questions-tab"
-                      type="button"
-                      role="tab"
-                      aria-controls="questions"
-                      aria-selected={activeTab === 'questions'}
                       onClick={() => setActiveTab('questions')}
+                      className="px-4 py-2 text-sm font-medium rounded-md text-green-600 dark:text-green-400 border border-green-500 hover:bg-green-50 dark:hover:bg-green-900/30 transition flex items-center gap-2"
                     >
-                      📋 Questions
+                      <span>📋</span> View Questions
                     </button>
-                  </li>
-                  {/* <li className="me-2" role="presentation">
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 text-red-700 dark:text-red-300">
+                    <p className="font-bold">Error</p>
+                    <p>{error}</p>
+                  </div>
+                )}
+              </section>
+            )}
+
+            {activeTab === 'files' && (
+              <section className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Case Files & Evidence</h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  Manage your documents, upload evidence, and link external files here.
+                </p>
+
+                <div className="space-y-4">
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white px-6 py-4 cursor-pointer flex justify-between items-center" onClick={() => handleAccordionToggle('uploadEvidence')}>
+                      Upload Evidence (Emails, Reviews, etc.)
+                      <svg className={`w-5 h-5 transition-transform ${openAccordion === 'uploadEvidence' ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </h3>
+                    {openAccordion === 'uploadEvidence' && (
+                      <div className="p-6 border-t border-gray-200 dark:border-gray-700">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                          Upload your emails, performance reviews, and other documents here. The AI will analyze them.
+                        </p>
+                        <DocumentUploader onUpload={handleDocumentUpload} />
+                        {caseData.rawEvidence.length > 0 && (
+                          <div className="mt-4">
+                            <h4 className="font-semibold mb-2">Uploaded Documents:</h4>
+                            <ul className="list-disc pl-5">
+                              {caseData.rawEvidence.map(doc => (
+                                <li key={doc.id} className="text-sm text-gray-700 dark:text-gray-300">
+                                  {doc.file.name} <span className="text-xs text-gray-500">({doc.category})</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white px-6 py-4 cursor-pointer flex justify-between items-center" onClick={() => handleAccordionToggle('eventLog')}>
+                      Event Log (Timeline)
+                      <svg className={`w-5 h-5 transition-transform ${openAccordion === 'eventLog' ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </h3>
+                    {openAccordion === 'eventLog' && (
+                      <div className="p-6 border-t border-gray-200 dark:border-gray-700">
+                        <TimelineBuilder
+                          initialEvents={caseData.timelineEvents || []}
+                          onAnalyze={handleTimelineAnalysis}
+                          isAnalyzing={isLoading}
+                          timeline={null} // Input mode only
+                          onEventsChange={handleTimelineEventsChange}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white px-6 py-4 cursor-pointer flex justify-between items-center" onClick={() => handleAccordionToggle('projectDocuments')}>
+                      Project Documents (Local Assets)
+                      <svg className={`w-5 h-5 transition-transform ${openAccordion === 'projectDocuments' ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </h3>
+                    {openAccordion === 'projectDocuments' && (
+                      <div className="p-6 border-t border-gray-200 dark:border-gray-700">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                          These documents are already loaded in your project. Click to view or download.
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {Object.entries(ASSETS.documents).map(([key, path]) => (
+                            <a
+                              key={key}
+                              href={path}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition group"
+                            >
+                              <span className="text-2xl mr-3">📄</span>
+                              <div>
+                                <div className="font-semibold text-gray-800 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                                  {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                                </div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px]">
+                                  {path.split('/').pop()}
+                                </div>
+                              </div>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white px-6 py-4 cursor-pointer flex justify-between items-center" onClick={() => handleAccordionToggle('characterEvidence')}>
+                      Character Evidence & Photos
+                      <svg className={`w-5 h-5 transition-transform ${openAccordion === 'characterEvidence' ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </h3>
+                    {openAccordion === 'characterEvidence' && (
+                      <div className="p-6 border-t border-gray-200 dark:border-gray-700">
+                        <CharacterProfileBuilder
+                          profileData={caseData.characterProfileData}
+                          onProfileChange={handleProfileChange}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white px-6 py-4 cursor-pointer flex justify-between items-center" onClick={() => handleAccordionToggle('handbookUrl')}>
+                      Employee Handbook URL (Optional)
+                      <svg className={`w-5 h-5 transition-transform ${openAccordion === 'handbookUrl' ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </h3>
+                    {openAccordion === 'handbookUrl' && (
+                      <div className="p-6 border-t border-gray-200 dark:border-gray-700">
+                        <input
+                          type="url"
+                          value={handbookUrl}
+                          onChange={(e) => setCaseData(prev => ({ ...prev, handbookUrl: e.target.value }))}
+                          placeholder="https://..."
+                          className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                        />
+                        <p className="text-sm text-gray-500 mt-2">
+                          Link to your employee handbook (Google Drive, Dropbox, etc.) for the AI to reference.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
+            )}
+            {isLoading && <Spinner />}
+
+            {((analysis && !isLoading) || activeTab === 'questions') && activeTab !== 'input' && (
+              <section>
+                <nav className="mb-8 border-b border-gray-200 dark:border-gray-700">
+                  <ul className="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
+                    {analysis && (
+                      <>
+                        <li className="me-2" role="presentation">
+                          <button
+                            className={`inline-block p-4 border-b-2 rounded-t-lg ${activeTab === 'investigation' ? 'text-blue-600 border-blue-600 dark:text-blue-500 dark:border-blue-500' : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300'}`}
+                            id="investigation-tab"
+                            type="button"
+                            role="tab"
+                            aria-controls="investigation"
+                            aria-selected={activeTab === 'investigation'}
+                            onClick={() => setActiveTab('investigation')}
+                          >
+                            Investigation
+                          </button>
+                        </li>
+                        <li className="me-2" role="presentation">
+                          <button
+                            className={`inline-block p-4 border-b-2 rounded-t-lg ${activeTab === 'evidence' ? 'text-blue-600 border-blue-600 dark:text-blue-500 dark:border-blue-500' : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300'}`}
+                            id="evidence-tab"
+                            type="button"
+                            role="tab"
+                            aria-controls="evidence"
+                            aria-selected={activeTab === 'evidence'}
+                            onClick={() => setActiveTab('evidence')}
+                          >
+                            Evidence Board
+                          </button>
+                        </li>
+                        <li className="me-2" role="presentation">
+                          <button
+                            className={`inline-block p-4 border-b-2 rounded-t-lg ${activeTab === 'strategy' ? 'text-blue-600 border-blue-600 dark:text-blue-500 dark:border-blue-500' : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300'}`}
+                            id="strategy-tab"
+                            type="button"
+                            role="tab"
+                            aria-controls="strategy"
+                            aria-selected={activeTab === 'strategy'}
+                            onClick={() => setActiveTab('strategy')}
+                          >
+                            Strategy Dashboard
+                          </button>
+                        </li>
+                        <li className="me-2" role="presentation">
+                          <button
+                            className={`inline-block p-4 border-b-2 rounded-t-lg ${activeTab === 'conference' ? 'text-blue-600 border-blue-600 dark:text-blue-500 dark:border-blue-500' : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300'}`}
+                            id="conference-tab"
+                            type="button"
+                            role="tab"
+                            aria-controls="conference"
+                            aria-selected={activeTab === 'conference'}
+                            onClick={() => setActiveTab('conference')}
+                          >
+                            Conference Prep
+                          </button>
+                        </li>
+                      </>
+                    )}
+                    <li className="me-2" role="presentation">
+                      <button
+                        className={`inline-block p-4 border-b-2 rounded-t-lg ${activeTab === 'questions' ? 'text-green-600 border-green-600 dark:text-green-500 dark:border-green-500' : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300'}`}
+                        id="questions-tab"
+                        type="button"
+                        role="tab"
+                        aria-controls="questions"
+                        aria-selected={activeTab === 'questions'}
+                        onClick={() => setActiveTab('questions')}
+                      >
+                        📋 Questions
+                      </button>
+                    </li>
+                    {/* <li className="me-2" role="presentation">
                     <button
                       className={`inline-block p-4 border-b-2 rounded-t-lg ${activeTab === 'advanced' ? 'text-purple-600 border-purple-600 dark:text-purple-500 dark:border-purple-500' : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300'}`}
                       id="advanced-tab"
@@ -1647,173 +1667,172 @@ const App: React.FC = () => {
                       ⚡ Advanced Tools
                     </button>
                   </li> */}
-                </ul>
-              </nav>
+                  </ul>
+                </nav>
 
-              <div id="myTabContent">
-                {analysis && (
-                  <>
-                    <div className={`${activeTab === 'investigation' ? 'block' : 'hidden'}`} role="tabpanel">
-                      {analysis ? (
-                        <AnalysisDisplay
-                          analysisResults={analysis}
-                          onAddInstance={handleAddInstance}
-                          onDeleteInstance={handleDeleteInstance}
-                          onUpdateInstanceNotes={handleUpdateInstanceNotes}
-                          onAddAttachments={handleAddAttachments}
-                          onDeleteAttachment={handleDeleteAttachment}
-                          onUpdateStatedAllegationEvidenceMentioned={handleUpdateStatedAllegationEvidenceMentioned}
-                          allBoardEvidence={analysis.boardState.evidence}
-                          onLinkEvidenceToStrategy={handleLinkEvidenceToStrategy}
+                <div id="myTabContent">
+                  {analysis && (
+                    <>
+                      <div className={`${activeTab === 'investigation' ? 'block' : 'hidden'}`} role="tabpanel">
+                        {analysis ? (
+                          <AnalysisDisplay
+                            analysisResults={analysis}
+                            onAddInstance={handleAddInstance}
+                            onDeleteInstance={handleDeleteInstance}
+                            onUpdateInstanceNotes={handleUpdateInstanceNotes}
+                            onAddAttachments={handleAddAttachments}
+                            onDeleteAttachment={handleDeleteAttachment}
+                            onUpdateStatedAllegationEvidenceMentioned={handleUpdateStatedAllegationEvidenceMentioned}
+                            allBoardEvidence={analysis.boardState.evidence}
+                            onLinkEvidenceToStrategy={handleLinkEvidenceToStrategy}
+                            onGetSuggestions={handleGetSuggestions}
+                            suggestions={suggestions}
+                            isSuggesting={isSuggesting}
+                            onMoveUnstatedClaim={handleMoveUnstatedClaim}
+                            onAddDocumentRequest={handleAddDocumentRequest}
+                            onUpdateDocumentRequest={handleUpdateDocumentRequest}
+                            onDeleteDocumentRequest={handleDeleteDocumentRequest}
+                            onExportSection={handleExportSection}
+                            onUpdateUserNotes={handleUpdateUserNotes}
+                          />
+                        ) : (
+                          <div className="p-8 text-center text-gray-500">
+                            No analysis data available. Please run the analysis again.
+                          </div>
+                        )}
+                        <FollowUpQuestions
+                          results={analysis}
                           onGetSuggestions={handleGetSuggestions}
                           suggestions={suggestions}
                           isSuggesting={isSuggesting}
-                          onMoveUnstatedClaim={handleMoveUnstatedClaim}
-                          onAddDocumentRequest={handleAddDocumentRequest}
-                          onUpdateDocumentRequest={handleUpdateDocumentRequest}
-                          onDeleteDocumentRequest={handleDeleteDocumentRequest}
                           onExportSection={handleExportSection}
                           onUpdateUserNotes={handleUpdateUserNotes}
                         />
-                      ) : (
-                        <div className="p-8 text-center text-gray-500">
-                          No analysis data available. Please run the analysis again.
+                      </div>
+                      <div className={`${activeTab === 'evidence' ? 'block' : 'hidden'}`} role="tabpanel">
+                        <EvidenceBoard
+                          board={analysis.boardState!}
+                          onDragEnd={handleEvidenceDragEnd}
+                          onSaveEvidence={handleSaveEvidence}
+                          onDeleteEvidence={handleDeleteEvidence}
+                          onRenameColumn={handleRenameColumn}
+                          onDeleteColumn={handleDeleteColumn}
+                          onAddColumn={handleAddColumn}
+                        />
+                      </div>
+                      <div className={`${activeTab === 'strategy' ? 'block' : 'hidden'}`} role="tabpanel">
+                        <Infographics
+                          careerEvents={caseData.careerEvents}
+                          peerComparisons={caseData.peerComparisons}
+                        />
+                      </div>
+                      <div className={`${activeTab === 'conference' ? 'block' : 'hidden'}`} role="tabpanel">
+                        <div className="space-y-8">
+                          <DriveScanner
+                            allegations={analysis.statedAllegations}
+                            onAddToBoard={handleAddDiscoveredEvidenceToBoard}
+                            evidenceIdsOnBoard={evidenceIdsOnBoard}
+                          />
+                          <DemandLetter
+                            analysisResults={analysis}
+                            complaintText={complaintText}
+                            jobDescriptionText={jobDescriptionText}
+                            actualDutiesText={actualDutiesText}
+                            characterProfileText={characterProfileText}
+                            handbookUrl={handbookUrl}
+                            generateLetter={generateLegalLetter}
+                            letterContent={caseData.letterContent}
+                            onLetterGenerated={(content) => setCaseData(prev => ({ ...prev, letterContent: content }))}
+                          />
                         </div>
-                      )}
-                      <FollowUpQuestions
-                        results={analysis}
-                        onGetSuggestions={handleGetSuggestions}
-                        suggestions={suggestions}
-                        isSuggesting={isSuggesting}
-                        onExportSection={handleExportSection}
-                        onUpdateUserNotes={handleUpdateUserNotes}
-                      />
-                    </div>
-                    <div className={`${activeTab === 'evidence' ? 'block' : 'hidden'}`} role="tabpanel">
-                      <EvidenceBoard
-                        board={analysis.boardState!}
-                        onDragEnd={handleEvidenceDragEnd}
-                        onSaveEvidence={handleSaveEvidence}
-                        onDeleteEvidence={handleDeleteEvidence}
-                        onRenameColumn={handleRenameColumn}
-                        onDeleteColumn={handleDeleteColumn}
-                        onAddColumn={handleAddColumn}
-                      />
-                    </div>
-                    <div className={`${activeTab === 'strategy' ? 'block' : 'hidden'}`} role="tabpanel">
-                      <Infographics
-                        careerEvents={caseData.careerEvents}
-                        peerComparisons={caseData.peerComparisons}
-                      />
-                    </div>
-                    <div className={`${activeTab === 'conference' ? 'block' : 'hidden'}`} role="tabpanel">
-                      <div className="space-y-8">
-                        <DriveScanner
-                          allegations={analysis.statedAllegations}
-                          onAddToBoard={handleAddDiscoveredEvidenceToBoard}
-                          evidenceIdsOnBoard={evidenceIdsOnBoard}
-                        />
-                        <DemandLetter
-                          analysisResults={analysis}
-                          complaintText={complaintText}
-                          jobDescriptionText={jobDescriptionText}
-                          actualDutiesText={actualDutiesText}
-                          characterProfileText={characterProfileText}
-                          handbookUrl={handbookUrl}
-                          generateLetter={generateLegalLetter}
-                          letterContent={caseData.letterContent}
-                          onLetterGenerated={(content) => setCaseData(prev => ({ ...prev, letterContent: content }))}
-                        />
                       </div>
-                    </div>
-                  </>
-                )}
+                    </>
+                  )}
 
-                <div className={`${activeTab === 'questions' ? 'block' : 'hidden'}`} role="tabpanel">
-                  <QuestionsView
-                    questions={questions}
-                    onUpdateQuestion={handleUpdateQuestion}
-                    onLoadPreFilled={handleLoadReferenceData}
-                    onAnalyzeQuestion={handleAnalyzeQuestion}
-                    onToggleDiscovery={handleToggleDiscovery}
-                    onToggleEvidence={handleToggleEvidence}
-                    confidenceScores={questionConfidenceScores}
-                    analysisResults={questionAnalysisResults}
-                    discoveryStatuses={discoveryStatuses}
-                  />
-                </div>
-
-                <div className={`${activeTab === 'advanced' ? 'block' : 'hidden'}`} role="tabpanel">
-                  <div className="space-y-8">
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Advanced Legal Tools</h2>
-
-                    {analysis && (
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <ComplaintGenerator
-                          analysisResults={analysis}
-                          complaintText={complaintText}
-                        />
-                        <DiscoveryRequestGenerator
-                          analysisResults={analysis}
-                          questions={questions}
-                        />
-                      </div>
-                    )}
-
-                    <ArbitrationAnalyzer
-                      onAnalyze={handleArbitrationAnalysis}
-                      isAnalyzing={isLoading}
-                      analysis={caseData.arbitrationAnalysis || null}
-                      protectedActivityDate={caseData.protectedActivityDate}
-                    />
-
-                    <TimelineBuilder
-                      initialEvents={caseData.timelineEvents || []}
-                      onAnalyze={handleTimelineAnalysis}
-                      isAnalyzing={isLoading}
-                      timeline={caseData.timeline}
-                    />
-
-                    <DamagesCalculator
-                      onCalculate={async (inputData) => {
-                        setIsLoading(true);
-                        try {
-                          const result = await calculateDamages(inputData);
-                          setCaseData(prev => ({ ...prev, damages: result }));
-                        } catch (err) {
-                          setError('Failed to calculate damages');
-                        } finally {
-                          setIsLoading(false);
-                        }
-                      }}
-                      damages={caseData.damages}
-                      isCalculating={isLoading}
-                    />
-
-                    <ComparatorModule
-                      onAnalyze={async (allegedMisconduct, yourDiscipline, comparators) => {
-                        setIsLoading(true);
-                        try {
-                          const result = await analyzeComparators(allegedMisconduct, yourDiscipline, comparators);
-                          setCaseData(prev => ({ ...prev, comparatorAnalysis: result }));
-                        } catch (err) {
-                          setError('Failed to analyze comparators');
-                        } finally {
-                          setIsLoading(false);
-                        }
-                      }}
-                      analysis={caseData.comparatorAnalysis}
-                      isAnalyzing={isLoading}
+                  <div className={`${activeTab === 'questions' ? 'block' : 'hidden'}`} role="tabpanel">
+                    <QuestionsView
+                      questions={questions}
+                      onUpdateQuestion={handleUpdateQuestion}
+                      onLoadPreFilled={handleLoadReferenceData}
+                      onAnalyzeQuestion={handleAnalyzeQuestion}
+                      onToggleDiscovery={handleToggleDiscovery}
+                      onToggleEvidence={handleToggleEvidence}
+                      confidenceScores={questionConfidenceScores}
+                      analysisResults={questionAnalysisResults}
+                      discoveryStatuses={discoveryStatuses}
                     />
                   </div>
+
+                  <div className={`${activeTab === 'advanced' ? 'block' : 'hidden'}`} role="tabpanel">
+                    <div className="space-y-8">
+                      <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Advanced Legal Tools</h2>
+
+                      {analysis && (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <ComplaintGenerator
+                            analysisResults={analysis}
+                            complaintText={complaintText}
+                          />
+                          <DiscoveryRequestGenerator
+                            analysisResults={analysis}
+                            questions={questions}
+                          />
+                        </div>
+                      )}
+
+                      <ArbitrationAnalyzer
+                        onAnalyze={handleArbitrationAnalysis}
+                        isAnalyzing={isLoading}
+                        analysis={caseData.arbitrationAnalysis || null}
+                        protectedActivityDate={caseData.protectedActivityDate}
+                      />
+
+                      <TimelineBuilder
+                        initialEvents={caseData.timelineEvents || []}
+                        onAnalyze={handleTimelineAnalysis}
+                        isAnalyzing={isLoading}
+                        timeline={caseData.timeline}
+                      />
+
+                      <DamagesCalculator
+                        onCalculate={async (inputData) => {
+                          setIsLoading(true);
+                          try {
+                            const result = await calculateDamages(inputData);
+                            setCaseData(prev => ({ ...prev, damages: result }));
+                          } catch (err) {
+                            setError('Failed to calculate damages');
+                          } finally {
+                            setIsLoading(false);
+                          }
+                        }}
+                        damages={caseData.damages}
+                        isCalculating={isLoading}
+                      />
+
+                      <ComparatorModule
+                        onAnalyze={async (allegedMisconduct, yourDiscipline, comparators) => {
+                          setIsLoading(true);
+                          try {
+                            const result = await analyzeComparators(allegedMisconduct, yourDiscipline, comparators);
+                            setCaseData(prev => ({ ...prev, comparatorAnalysis: result }));
+                          } catch (err) {
+                            setError('Failed to analyze comparators');
+                          } finally {
+                            setIsLoading(false);
+                          }
+                        }}
+                        analysis={caseData.comparatorAnalysis}
+                        isAnalyzing={isLoading}
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </section >
-          )}
-        </div >
-      </main >
-
-
+              </section >
+            )}
+          </div>
+        </main >
+      )}
     </div >
   );
 }

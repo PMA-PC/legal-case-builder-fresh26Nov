@@ -12,12 +12,14 @@
     "@google/generative-ai": "^0.24.1",
     "@hello-pangea/dnd": "latest",
     "@supabase/supabase-js": "^2.86.0",
+    "@types/uuid": "^10.0.0",
     "clsx": "latest",
     "lucide-react": "latest",
     "react": "latest",
     "react-dom": "latest",
     "recharts": "latest",
-    "tailwind-merge": "latest"
+    "tailwind-merge": "latest",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@types/node": "latest",
