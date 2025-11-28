@@ -67,6 +67,8 @@ export const parseReferenceData = (markdown: string): ParsedCaseData => {
 
     // Extract specific fields based on question numbers (mapping based on context)
     const characterProfileText = [
+        questions[200]?.answer, // Professional Profile
+        questions[201]?.answer, // Character / Championship Characteristics
         questions[1]?.answer,
         questions[5]?.answer,
         questions[150]?.answer
