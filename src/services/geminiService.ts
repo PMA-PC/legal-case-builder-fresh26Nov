@@ -15,13 +15,18 @@ const getAI = () => {
 
 // Helper to clean JSON string
 const cleanJson = (text: string): string => {
-  let clean = text.trim();
-  if (clean.startsWith('```json')) {
-    clean = clean.replace(/^```json/, '').replace(/```$/, '');
-  } else if (clean.startsWith('```')) {
-    clean = clean.replace(/^```/, '').replace(/```$/, '');
+  // Try to find markdown code block
+  const match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (match) {
+    return match[1].trim();
   }
-  return clean.trim();
+  // If no code block, try to find the first '{' and last '}'
+  const firstOpen = text.indexOf('{');
+  const lastClose = text.lastIndexOf('}');
+  if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
+    return text.substring(firstOpen, lastClose + 1);
+  }
+  return text.trim();
 };
 
 export async function analyzeCase(
@@ -31,6 +36,7 @@ export async function analyzeCase(
   characterProfileText: string,
   handbookUrl: string
 ): Promise<AnalysisResults | null> {
+  let rawText = '';
   try {
     const genAI = getAI();
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -55,11 +61,15 @@ export async function analyzeCase(
     });
 
     const response = await result.response;
-    const jsonText = cleanJson(response.text());
+    rawText = response.text();
+    console.log("Raw Gemini response:", rawText);
+
+    const jsonText = cleanJson(rawText);
     return JSON.parse(jsonText) as AnalysisResults;
   } catch (error: any) {
     console.error("Error analyzing case:", error);
-    alert(`DEBUG: Error analyzing case: ${JSON.stringify(error, Object.getOwnPropertyNames(error))}`);
+    console.error("Raw Text was:", rawText);
+    alert(`DEBUG: Error analyzing case. \nError: ${error.message}\n\nRaw Response Start: ${rawText.substring(0, 500)}`);
     return null;
   }
 }
