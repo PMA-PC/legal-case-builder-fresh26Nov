@@ -59,7 +59,7 @@ export const LegalStrategyCenter: React.FC<Props> = ({ analysisData, onBack }) =
             setCaseGraph(graph);
         } catch (err) {
             console.error("Failed to init strategy:", err);
-            alert("Failed to initialize Strategy Center. Check console for details.");
+            alert(`Failed to initialize Strategy Center: ${err instanceof Error ? err.message : String(err)}`);
         } finally {
             setLoading(false);
         }

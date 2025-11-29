@@ -2,6 +2,27 @@ import { getAI } from './geminiService';
 import { CaseGraph, Complaint, LegalFact, EvidenceItem, EvidenceGap } from '../types/legalStrategy';
 import { v4 as uuidv4 } from 'uuid';
 
+// Helper to clean JSON string (duplicated from geminiService to avoid circular deps or just for safety)
+function cleanJson(text: string): string {
+    let cleanText = text.replace(/```json/g, '').replace(/```/g, '');
+    const firstOpen = cleanText.indexOf('{');
+    const lastClose = cleanText.lastIndexOf('}');
+    if (firstOpen !== -1 && lastClose !== -1) {
+        cleanText = cleanText.substring(firstOpen, lastClose + 1);
+    }
+    return cleanText;
+}
+
+function cleanJsonArray(text: string): string {
+    let cleanText = text.replace(/```json/g, '').replace(/```/g, '');
+    const firstOpen = cleanText.indexOf('[');
+    const lastClose = cleanText.lastIndexOf(']');
+    if (firstOpen !== -1 && lastClose !== -1) {
+        cleanText = cleanText.substring(firstOpen, lastClose + 1);
+    }
+    return cleanText;
+}
+
 export class LegalStrategyService {
 
     async ingestData(
@@ -129,11 +150,12 @@ export class LegalStrategyService {
 
             const responseText = result.response.text();
             console.log("Gemini analysis response length:", responseText.length);
-            return JSON.parse(responseText);
+            const cleaned = cleanJson(responseText);
+            return JSON.parse(cleaned);
 
         } catch (error) {
             console.error("Error analyzing case context:", error);
-            throw new Error("Failed to analyze case context");
+            throw error; // Re-throw to be caught by UI
         }
     }
 
@@ -166,7 +188,8 @@ export class LegalStrategyService {
 
             const responseText = result.response.text();
             console.log("Gemini response length:", responseText.length);
-            const rawFacts = JSON.parse(responseText);
+            const cleaned = cleanJsonArray(responseText);
+            const rawFacts = JSON.parse(cleaned);
 
             return rawFacts.map((f: any) => ({
                 id: uuidv4(),
